@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="generator" content="VuePress 2.0.0-rc.30" />
+    <style>
+      :root {
+        --vp-c-bg: #fff;
+      }
+
+      [data-theme='dark'] {
+        --vp-c-bg: #1b1b1f;
+      }
+
+      html,
+      body {
+        background-color: var(--vp-c-bg);
+      }
+    </style>
+    <script>
+      const useChoice = localStorage.getItem('vuepress-color-scheme')
+      const systemStatus =
+        'matchMedia' in window
+          ? window.matchMedia('(prefers-color-scheme: dark)').matches
+          : false
+
+      if (useChoice === 'light') {
+        document.documentElement.dataset.theme = 'light'
+      } else if (useChoice === 'dark' || systemStatus) {
+        document.documentElement.dataset.theme = 'dark'
+      }
+    </script>
+    <link rel="icon" href="/aktsql-logo.svg"><meta name="theme-color" content="#090909"><meta property="og:title" content="AktSQL Database Management"><meta property="og:description" content="面向数据库浏览、SQL 查询和表结构编辑的桌面 SQL GUI。"><title>AktSQL</title><meta name="description" content="AktSQL Database Management 官方网站。">
+    <link rel="preload" href="/assets/style-BGfIYhjR.css" as="style"><link rel="stylesheet" href="/assets/style-BGfIYhjR.css">
+    <link rel="modulepreload" href="/assets/app-DWwNRGPc.js"><link rel="modulepreload" href="/assets/404.html-DtjGAqMS.js">
+    <link rel="prefetch" href="/assets/README-BTL_6CTP.js" as="script"><link rel="prefetch" href="/assets/cloudflare-pages-DJbrkI_x.js" as="script"><link rel="prefetch" href="/assets/downloads-CroI6vAf.js" as="script"><link rel="prefetch" href="/assets/getting-started-CeKgmXgd.js" as="script">
+  </head>
+  <body>
+    <div id="app"><!--[--><div class="vp-theme-container" vp-container data-v-3fac1c72><main class="page" data-v-3fac1c72><div vp-content data-v-3fac1c72><h1 data-v-3fac1c72>404</h1><blockquote data-v-3fac1c72>There&#39;s nothing here.</blockquote><a class="route-link" href="/" data-v-3fac1c72>Take me home</a></div></main></div><!--[--><!----><!--]--><!--]--></div>
+    <script type="module" src="/assets/app-DWwNRGPc.js" defer></script>
+  </body>
+</html>

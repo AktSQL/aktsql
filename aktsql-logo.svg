@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200">
+  <g transform="translate(40, 40)">
+    <path d="M0 30 Q0 10 60 10 Q120 10 120 30 Q120 50 60 50 Q0 50 0 30" fill="#121414" />
+    <path d="M0 30 L0 50 Q0 70 60 70 Q120 70 120 50 L120 30 Q120 50 60 50 Q0 50 0 30 Z" fill="#121414" />
+
+    <path d="M0 60 L0 80 Q0 100 60 100 Q120 100 120 80 L120 60 Q120 80 60 80 Q0 80 0 60 Z" fill="#b22222" />
+
+    <path d="M0 90 L0 110 Q0 130 60 130 Q120 130 120 110 L120 90 Q120 110 60 110 Q0 110 0 90 Z" fill="#121414" />
+  </g>
+
+  <text x="180" y="105" font-family="Inter, sans-serif" font-weight="800" font-size="72" fill="#121414">Akt</text>
+
+  <text x="180" y="145" font-family="Inter, sans-serif" font-weight="400" font-size="28" fill="#121414" letter-spacing="1">DATABASE MANAGEMENT</text>
+</svg>
