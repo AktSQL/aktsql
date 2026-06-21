@@ -77,6 +77,7 @@ h3 {
 }
 
 .hero-actions,
+.download-section,
 .download-grid,
 .feature-grid,
 .workflow-grid {
@@ -169,12 +170,38 @@ h3 {
   border-top: 1px solid var(--vp-c-border);
 }
 
+.download-section {
+  gap: 24px;
+  margin: 28px 0;
+}
+
+.download-group {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.34fr) minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+  padding: 22px 0;
+  border-top: 1px solid var(--vp-c-border);
+}
+
+.download-group h2 {
+  margin: 0 0 8px;
+}
+
+.download-group p {
+  margin: 0;
+  color: var(--vp-c-text-mute);
+  line-height: 1.6;
+}
+
 .download-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .download-card {
-  display: block;
+  display: grid;
+  gap: 8px;
+  min-height: 132px;
   padding: 18px;
   border: 1px solid var(--vp-c-border);
   border-radius: 6px;
@@ -187,11 +214,31 @@ h3 {
   border-color: var(--vp-c-accent);
 }
 
+.download-card span {
+  color: var(--vp-c-accent);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.download-card strong {
+  color: var(--vp-c-text);
+  font-size: 18px;
+}
+
+.download-card code {
+  align-self: end;
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 960px) {
   .home-hero,
   .feature-grid,
   .workflow-grid,
   .download-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .download-group {
     grid-template-columns: 1fr;
   }
 

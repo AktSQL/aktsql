@@ -1,3 +1,10 @@
+param(
+    [ValidateSet("x64", "arm64")]
+    [string]$Arch = "x64",
+    [string]$TargetTriple = "",
+    [string]$WixArch = ""
+)
+
 $ErrorActionPreference = "Stop"
 
 $version = $env:GITHUB_REF_NAME
@@ -12,15 +19,23 @@ if ($version -notmatch '^\d+\.\d+\.\d+(\.\d+)?$') {
 }
 
 $root = (Resolve-Path ".").Path
-$sourceDir = Join-Path $root "target\release"
-$dist = Join-Path $root "dist\windows"
+if ([string]::IsNullOrWhiteSpace($TargetTriple)) {
+    $sourceDir = Join-Path $root "target\release"
+} else {
+    $sourceDir = Join-Path $root "target\$TargetTriple\release"
+}
+$dist = Join-Path $root "dist\windows-$Arch"
 $exe = Join-Path $sourceDir "aktsql.exe"
 $wxs = Join-Path $root "packaging\windows\AktSQL.wxs"
-$wixObj = Join-Path $dist "AktSQL.wixobj"
-$stableExe = Join-Path $dist "AktSQL-windows-x64.exe"
-$stableMsi = Join-Path $dist "AktSQL-windows-x64.msi"
-$versionedExe = Join-Path $dist "AktSQL-$version-windows-x64.exe"
-$versionedMsi = Join-Path $dist "AktSQL-$version-windows-x64.msi"
+$wixObj = Join-Path $dist "AktSQL-$Arch.wixobj"
+$stableExe = Join-Path $dist "AktSQL-windows-$Arch.exe"
+$stableMsi = Join-Path $dist "AktSQL-windows-$Arch.msi"
+$versionedExe = Join-Path $dist "AktSQL-$version-windows-$Arch.exe"
+$versionedMsi = Join-Path $dist "AktSQL-$version-windows-$Arch.msi"
+
+if ([string]::IsNullOrWhiteSpace($WixArch)) {
+    $WixArch = $Arch
+}
 
 New-Item -ItemType Directory -Force -Path $dist | Out-Null
 Copy-Item $exe $stableExe -Force
@@ -31,7 +46,7 @@ if (Test-Path $wixBin) {
     $env:PATH = "$env:PATH;$wixBin"
 }
 
-candle.exe -dSourceDir="$sourceDir" -dProductVersion="$version" -out "$wixObj" "$wxs"
+candle.exe -arch "$WixArch" -dSourceDir="$sourceDir" -dProductVersion="$version" -out "$wixObj" "$wxs"
 light.exe -ext WixUIExtension -out "$stableMsi" "$wixObj"
 Copy-Item $stableMsi $versionedMsi -Force
 

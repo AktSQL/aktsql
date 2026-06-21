@@ -49,15 +49,29 @@ jobs:
         run: cargo test -p aktsql
 
   windows:
-    name: Windows exe and msi
+    name: Windows ${{ matrix.arch }} exe and msi
     needs: verify
     runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            rust-target: x86_64-pc-windows-msvc
+            vcpkg-triplet: x64-windows-static
+            wix-arch: x64
+          - arch: arm64
+            rust-target: aarch64-pc-windows-msvc
+            vcpkg-triplet: arm64-windows-static
+            wix-arch: arm64
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust-target }}
 
       - name: Cache cargo
         uses: Swatinem/rust-cache@v2
@@ -65,31 +79,31 @@ jobs:
       - name: Prepare OpenSSL
         shell: pwsh
         run: |
-          vcpkg install openssl:x64-windows-static
-          "OPENSSL_DIR=$env:VCPKG_INSTALLATION_ROOT\installed\x64-windows-static" | Out-File -FilePath $env:GITHUB_ENV -Append
+          vcpkg install openssl:${{ matrix.vcpkg-triplet }}
+          "OPENSSL_DIR=$env:VCPKG_INSTALLATION_ROOT\installed\${{ matrix.vcpkg-triplet }}" | Out-File -FilePath $env:GITHUB_ENV -Append
           "OPENSSL_STATIC=1" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Build release binary
-        run: cargo build --release -p aktsql
+        run: cargo build --release -p aktsql --target ${{ matrix.rust-target }}
 
       - name: Install WiX Toolset
         run: choco install wixtoolset --no-progress -y
 
       - name: Package Windows artifacts
         shell: pwsh
-        run: .github/scripts/package-windows.ps1
+        run: .github/scripts/package-windows.ps1 -Arch ${{ matrix.arch }} -TargetTriple ${{ matrix.rust-target }} -WixArch ${{ matrix.wix-arch }}
 
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: windows
-          path: dist/windows/*
+          name: windows-${{ matrix.arch }}
+          path: dist/windows-${{ matrix.arch }}/*
           if-no-files-found: error
 
   macos:
-    name: macOS app and dmg
+    name: macOS arm64 app and dmg
     needs: verify
-    runs-on: macos-latest
+    runs-on: macos-14
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -109,19 +123,27 @@ jobs:
         run: cargo build --release -p aktsql
 
       - name: Package macOS artifacts
-        run: bash .github/scripts/package-macos.sh
+        run: bash .github/scripts/package-macos.sh arm64
 
       - name: Upload macOS artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: macos
-          path: dist/macos-artifacts/*
+          name: macos-arm64
+          path: dist/macos-arm64-artifacts/*
           if-no-files-found: error
 
   linux:
-    name: Linux AppImage
+    name: Linux ${{ matrix.arch }} AppImage
     needs: verify
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-latest
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -150,13 +172,13 @@ jobs:
         run: cargo build --release -p aktsql
 
       - name: Package AppImage
-        run: bash .github/scripts/package-linux-appimage.sh
+        run: bash .github/scripts/package-linux-appimage.sh ${{ matrix.arch }}
 
       - name: Upload Linux artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: linux
-          path: dist/linux-artifacts/*
+          name: linux-${{ matrix.arch }}
+          path: dist/linux-${{ matrix.arch }}-artifacts/*
           if-no-files-found: error
 
   publish:
@@ -175,3 +197,4 @@ jobs:
         with:
           files: release-artifacts/**/*
           fail_on_unmatched_files: true
+          overwrite_files: true

@@ -6,9 +6,22 @@ VERSION="${VERSION#v}"
 if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+ ]]; then
   VERSION="$(sed -n 's/^version = "\(.*\)"/\1/p' crates/aktsql_app/Cargo.toml | head -n 1)"
 fi
+PACKAGE_ARCH="${1:-${AKTSQL_PACKAGE_ARCH:-$(uname -m)}}"
+case "$PACKAGE_ARCH" in
+  arm64 | aarch64)
+    PACKAGE_ARCH="arm64"
+    ;;
+  x86_64 | amd64)
+    PACKAGE_ARCH="x64"
+    ;;
+  *)
+    echo "Unsupported macOS architecture: $PACKAGE_ARCH" >&2
+    exit 1
+    ;;
+esac
 ROOT="$(pwd)"
 APP_DIR="$ROOT/dist/macos/AktSQL.app"
-ARTIFACT_DIR="$ROOT/dist/macos-artifacts"
+ARTIFACT_DIR="$ROOT/dist/macos-$PACKAGE_ARCH-artifacts"
 BIN="$ROOT/target/release/aktsql"
 
 rm -rf "$APP_DIR" "$ARTIFACT_DIR"
@@ -43,12 +56,12 @@ cat > "$APP_DIR/Contents/Info.plist" <<PLIST
 </plist>
 PLIST
 
-tar -czf "$ARTIFACT_DIR/AktSQL-macos-app.tar.gz" -C "$ROOT/dist/macos" "AktSQL.app"
-cp "$ARTIFACT_DIR/AktSQL-macos-app.tar.gz" "$ARTIFACT_DIR/AktSQL-$VERSION-macos-app.tar.gz"
+tar -czf "$ARTIFACT_DIR/AktSQL-macos-$PACKAGE_ARCH-app.tar.gz" -C "$ROOT/dist/macos" "AktSQL.app"
+cp "$ARTIFACT_DIR/AktSQL-macos-$PACKAGE_ARCH-app.tar.gz" "$ARTIFACT_DIR/AktSQL-$VERSION-macos-$PACKAGE_ARCH-app.tar.gz"
 hdiutil create \
   -volname "AktSQL" \
   -srcfolder "$APP_DIR" \
   -ov \
   -format UDZO \
-  "$ARTIFACT_DIR/AktSQL-macos.dmg"
-cp "$ARTIFACT_DIR/AktSQL-macos.dmg" "$ARTIFACT_DIR/AktSQL-$VERSION-macos.dmg"
+  "$ARTIFACT_DIR/AktSQL-macos-$PACKAGE_ARCH.dmg"
+cp "$ARTIFACT_DIR/AktSQL-macos-$PACKAGE_ARCH.dmg" "$ARTIFACT_DIR/AktSQL-$VERSION-macos-$PACKAGE_ARCH.dmg"
