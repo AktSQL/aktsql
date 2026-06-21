@@ -7,12 +7,6 @@ on:
       - "docs-site/**"
       - ".github/workflows/docs-pages.yml"
   workflow_dispatch:
-    inputs:
-      deploy_to_cloudflare:
-        description: "Deploy uploaded Cloudflare version to 100% traffic"
-        required: false
-        default: false
-        type: boolean
 
 permissions:
   contents: write
@@ -50,38 +44,42 @@ jobs:
           publish_dir: docs-site/docs/.vuepress/dist
           force_orphan: true
 
-      - name: Upload Cloudflare Worker version
+      - name: Ensure Cloudflare Pages project
         working-directory: docs-site
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          VERSION_TAG: docs-${{ github.sha }}
         run: |
           if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
-            echo "Cloudflare secrets are missing; skipping wrangler versions upload."
+            echo "Cloudflare secrets are missing; skipping Pages project creation."
             exit 0
           fi
 
-          npx wrangler versions upload \
-            --config wrangler.jsonc \
-            --tag "$VERSION_TAG" \
-            --message "Upload AktSQL official site from $GITHUB_SHA"
+          if npx wrangler pages project list --json | node -e '
+            const input = require("fs").readFileSync(0, "utf8");
+            const projects = JSON.parse(input);
+            const found = projects.some((project) => project.name === "aktsql-official-site");
+            process.exit(found ? 0 : 1);
+          '; then
+            echo "Cloudflare Pages project aktsql-official-site already exists."
+          else
+            npx wrangler pages project create aktsql-official-site \
+              --production-branch main
+          fi
 
-      - name: Deploy Cloudflare Worker version
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy_to_cloudflare }}
+      - name: Deploy Cloudflare Pages
         working-directory: docs-site
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          VERSION_TAG: docs-${{ github.sha }}
         run: |
           if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
-            echo "Cloudflare secrets are missing; cannot deploy uploaded version."
-            exit 1
+            echo "Cloudflare secrets are missing; skipping Pages deployment."
+            exit 0
           fi
 
-          npx wrangler versions deploy \
-            --config wrangler.jsonc \
-            --version-tag "$VERSION_TAG@100%" \
-            --message "Deploy AktSQL official site from $GITHUB_SHA" \
-            --yes
+          npx wrangler pages deploy docs/.vuepress/dist \
+            --project-name aktsql-official-site \
+            --branch main \
+            --commit-hash "$GITHUB_SHA" \
+            --commit-message "Deploy AktSQL official site from $GITHUB_SHA"

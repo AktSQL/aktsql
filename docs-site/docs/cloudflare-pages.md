@@ -1,33 +1,37 @@
-# Cloudflare Deployment
+# Cloudflare Pages
 
-The repository keeps a dedicated `gh-pages` branch for static site artifacts and
-also uploads Cloudflare Worker versions with Wrangler.
+AktSQL publishes the official site as a Cloudflare Pages project. This creates a
+Cloudflare Pages domain such as:
 
-## Wrangler versions
-
-GitHub Actions builds VuePress, publishes the static output to `gh-pages`, then
-runs:
-
-```sh
-npx wrangler versions upload \
-  --config wrangler.jsonc \
-  --tag docs-<git-sha> \
-  --message "Upload AktSQL official site"
+```text
+aktsql-official-site.pages.dev
 ```
 
-Manual workflow runs can also deploy the uploaded version to all traffic:
+## Pages deployment
+
+GitHub Actions builds VuePress, publishes the static output to `gh-pages` for a
+plain static artifact branch, then deploys the same output to Cloudflare Pages:
 
 ```sh
-npx wrangler versions deploy \
-  --config wrangler.jsonc \
-  --version-tag docs-<git-sha>@100% \
-  --yes
+npx wrangler pages deploy docs/.vuepress/dist \
+  --project-name aktsql-official-site \
+  --branch main
+```
+
+The Pages project name is:
+
+```text
+aktsql-official-site
 ```
 
 Required GitHub secrets:
 
 - `CLOUDFLARE_API_TOKEN`
 - `CLOUDFLARE_ACCOUNT_ID`
+
+After the first successful deployment, Cloudflare will show the project under
+**Workers & Pages -> Pages**, and the default domain will be available from the
+project overview.
 
 ## Static artifact branch
 
@@ -40,19 +44,9 @@ The `gh-pages` branch is an orphan branch containing only built static files:
 
 No Rust source code or application workspace files should live in `gh-pages`.
 
-## Cloudflare Pages fallback
-
-If Cloudflare Pages is used instead of Workers versions, connect Pages to the
-`gh-pages` branch:
-
-- Production branch: `gh-pages`
-- Build command: leave empty
-- Build output directory: `/`
-- Root directory: leave empty
-
 ## Alternative direct build
 
-Cloudflare can also build from `main` directly:
+Cloudflare Pages can also build from `main` directly:
 
 - Root directory: `docs-site`
 - Build command: `npm install && npm run docs:build`
