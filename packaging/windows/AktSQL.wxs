@@ -7,7 +7,11 @@
     Version="$(var.ProductVersion)"
     Manufacturer="AktSQL"
     UpgradeCode="11F00588-9CF1-457C-9F16-E0384A94D89B">
-    <Package InstallerVersion="500" Compressed="yes" InstallScope="perMachine" />
+    <Package
+      InstallerVersion="500"
+      Compressed="yes"
+      InstallScope="perMachine"
+      Platform="$(var.PackagePlatform)" />
     <MajorUpgrade DowngradeErrorMessage="A newer version of AktSQL is already installed." />
     <MediaTemplate EmbedCab="yes" />
 
@@ -18,7 +22,7 @@
 
   <Fragment>
     <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="ProgramFilesFolder">
+      <Directory Id="ProgramFiles64Folder">
         <Directory Id="INSTALLFOLDER" Name="AktSQL" />
       </Directory>
       <Directory Id="ProgramMenuFolder">
@@ -29,7 +33,7 @@
 
   <Fragment>
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
-      <Component Id="AktSQLExe" Guid="B5A3AF3D-AF0B-48E3-A471-3715C5595422">
+      <Component Id="AktSQLExe" Guid="B5A3AF3D-AF0B-48E3-A471-3715C5595422" Win64="yes">
         <File Id="AktSQLExeFile" Source="$(var.SourceDir)\aktsql.exe" KeyPath="yes">
           <Shortcut
             Id="AktSQLStartMenuShortcut"

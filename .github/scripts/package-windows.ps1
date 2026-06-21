@@ -46,7 +46,7 @@ if (Test-Path $wixBin) {
     $env:PATH = "$env:PATH;$wixBin"
 }
 
-candle.exe -arch "$WixArch" -dSourceDir="$sourceDir" -dProductVersion="$version" -out "$wixObj" "$wxs"
+candle.exe -arch "$WixArch" -dSourceDir="$sourceDir" -dProductVersion="$version" -dPackagePlatform="$WixArch" -out "$wixObj" "$wxs"
 light.exe -ext WixUIExtension -out "$stableMsi" "$wixObj"
 Copy-Item $stableMsi $versionedMsi -Force
 
