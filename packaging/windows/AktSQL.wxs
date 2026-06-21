@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product
+    Id="*"
+    Name="AktSQL"
+    Language="1033"
+    Version="$(var.ProductVersion)"
+    Manufacturer="AktSQL"
+    UpgradeCode="11F00588-9CF1-457C-9F16-E0384A94D89B">
+    <Package InstallerVersion="500" Compressed="yes" InstallScope="perMachine" />
+    <MajorUpgrade DowngradeErrorMessage="A newer version of AktSQL is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <Feature Id="ProductFeature" Title="AktSQL" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+    </Feature>
+  </Product>
+
+  <Fragment>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="AktSQL" />
+      </Directory>
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="AktSQL" />
+      </Directory>
+    </Directory>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <Component Id="AktSQLExe" Guid="B5A3AF3D-AF0B-48E3-A471-3715C5595422">
+        <File Id="AktSQLExeFile" Source="$(var.SourceDir)\aktsql.exe" KeyPath="yes">
+          <Shortcut
+            Id="AktSQLStartMenuShortcut"
+            Directory="ApplicationProgramsFolder"
+            Name="AktSQL"
+            WorkingDirectory="INSTALLFOLDER"
+            Advertise="yes" />
+        </File>
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+</Wix>

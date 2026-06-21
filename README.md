@@ -26,6 +26,7 @@ aktsql.config.json
 技术栈：
 - Rust workspace
 - iced desktop UI
+- VuePress official site in `docs-site/`
 
 运行：
 ```sh
@@ -42,3 +43,14 @@ cargo check
 cargo fmt --check
 cargo check
 ```
+
+官网：
+```sh
+cd docs-site
+npm install
+npm run docs:dev
+```
+
+发布：
+- 官网由 GitHub Actions 构建后推送到 `gh-pages` 分支，Cloudflare Pages 连接该分支。
+- 桌面版本在推送 `v*` tag 后构建 Windows `.exe/.msi`、macOS `.app/.dmg`、Linux `.AppImage`。

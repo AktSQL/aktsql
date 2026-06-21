@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=AktSQL
+Comment=AktSQL Database Management
+Exec=aktsql
+Icon=aktsql
+Categories=Development;Database;
+Terminal=false

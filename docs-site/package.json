@@ -1,0 +1,18 @@
+{
+  "name": "aktsql-official-site",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "docs:dev": "vuepress dev docs",
+    "docs:build": "vuepress build docs",
+    "docs:clean-dev": "vuepress dev docs --clean-cache"
+  },
+  "devDependencies": {
+    "@vuepress/bundler-vite": "^2.0.0-rc.24",
+    "@vuepress/theme-default": "^2.0.0-rc.24",
+    "sass": "^1.83.4",
+    "vue": "^3.5.13",
+    "vuepress": "^2.0.0-rc.24"
+  }
+}
