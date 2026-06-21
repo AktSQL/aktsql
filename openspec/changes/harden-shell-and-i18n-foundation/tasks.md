@@ -1,19 +1,19 @@
-## 1. Window And Layout Stability
+## 1. 窗口与布局稳定性
 
-- [x] 1.1 Enforce fixed application dimensions with native decorations and standard minimize support.
-- [x] 1.2 Bound connection manager list, form, validation, and status text widths inside the fixed window.
+- [x] 1.1 使用原生装饰和标准最小化支持，强制应用固定尺寸。
+- [x] 1.2 在固定窗口内约束连接管理器列表、表单、校验和状态文本宽度。
 
-## 2. Persistence Foundation
+## 2. 持久化基础
 
-- [x] 2.1 Add stable Akt config path resolution with a working-directory fallback.
-- [x] 2.2 Preserve the existing no-password persistence behavior for saved connection profiles.
+- [x] 2.1 添加稳定 Akt 配置路径解析，并提供工作目录 fallback。
+- [x] 2.2 保留已保存连接配置不持久化密码的现有行为。
 
-## 3. I18n Foundation
+## 3. I18n 基础
 
-- [x] 3.1 Move active shell and connection-manager action labels into the i18n text catalog.
-- [x] 3.2 Keep typed domain labels such as section names, driver names, and quick-action labels stable for later translation.
+- [x] 3.1 将活跃 shell 和连接管理器操作标签移动到 i18n 文本目录。
+- [x] 3.2 保持 section 名、driver 名和 quick-action 标签等类型化领域标签稳定，方便后续翻译。
 
-## 4. Verification
+## 4. 验证
 
-- [x] 4.1 Run Rust formatting and compiler checks.
-- [x] 4.2 Confirm OpenSpec reports the change artifacts and task list as complete.
+- [x] 4.1 运行 Rust 格式化和编译检查。
+- [x] 4.2 确认 OpenSpec 报告 change artifacts 和任务清单已完成。

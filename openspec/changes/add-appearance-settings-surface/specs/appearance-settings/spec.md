@@ -1,15 +1,15 @@
 ## ADDED Requirements
 
-### Requirement: Appearance Settings Workspace
+### Requirement: 外观设置工作区
 
-The system SHALL provide an Appearance Settings workspace from the Settings navigation item.
+系统 SHALL 从设置导航项提供外观设置工作区。
 
-#### Scenario: User opens Settings
+#### Scenario: 用户打开设置
 
-- **WHEN** the user selects Settings
-- **THEN** the workspace shows appearance controls for interface theme, layout density, typography, and keybindings
+- **WHEN** 用户选择设置
+- **THEN** 工作区显示界面主题、布局密度、字体和快捷键的外观控件
 
-#### Scenario: User applies configuration
+#### Scenario: 用户应用配置
 
-- **WHEN** the user activates Apply Configuration in the first settings slice
-- **THEN** the app applies an immediate visual change using the existing theme toggle behavior
+- **WHEN** 用户在第一版设置切片中触发应用配置
+- **THEN** 应用使用现有主题切换行为立即应用视觉变化

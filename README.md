@@ -22,11 +22,13 @@ aktsql.config.json
 
 需求文档：
 - [原型需求切片](docs/product/aktsql-requirement-slices.md)
+- [数据库最大公约数与产品亮点](docs/product/database-common-denominator-highlights.md)
+- [新增表与修改表设计计划](docs/product/table-create-alter-plan.md)
 
 技术栈：
 - Rust workspace
 - iced desktop UI
-- VuePress official site in `docs-site/`
+- `docs-site/` 中的 VuePress 官方站点
 
 运行：
 ```sh

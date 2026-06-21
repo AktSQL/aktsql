@@ -12,6 +12,11 @@ fn connection_success_opens_database_workspace_not_query_explorer() {
         driver: DatabaseDriver::MySql,
         target: String::from("127.0.0.1:3306"),
         elapsed_ms: 1,
+        connect_latency_ms: 1,
+        roundtrip_latency_ms: 1,
+        metadata_latency_ms: Some(1),
+        server_version: Some(String::from("8.0")),
+        encoding: Some(String::from("utf8mb4/utf8mb4_bin")),
     };
 
     let _ = app.update(Message::ConnectionConnectFinished(0, Ok(report)));
@@ -734,6 +739,94 @@ fn alter_table_pending_add_column_row_can_be_removed() {
 }
 
 #[test]
+fn alter_table_revert_selected_change_removes_pending_add_column() {
+    let mut app = Akt::default();
+    app.connection_manager.set_driver(DatabaseDriver::MySql);
+    app.connection_manager
+        .set_field(ConnectionField::Database, String::from("myapp_db"));
+    app.alter_table_draft = Some(AlterTableDraft::new(String::from("users"), String::new()));
+    app.table_details = Some(TableDetails {
+        table: String::from("users"),
+        driver: DatabaseDriver::MySql,
+        sections: Vec::new(),
+        columns: vec![TableColumnDetail {
+            name: String::from("id"),
+            data_type: String::from("BIGINT"),
+            nullable: String::from("NO"),
+            default_value: String::new(),
+            extra: String::new(),
+        }],
+        indexes: Vec::new(),
+        create_statement: String::new(),
+    });
+
+    let _ = app.update(Message::SelectAlterTableColumn(0));
+    let _ = app.update(Message::InsertAlterTableColumnAfterSelection);
+    let _ = app.update(Message::RevertSelectedAlterTableChange);
+
+    let draft = app
+        .alter_table_draft()
+        .expect("alter table draft should stay open");
+    assert_eq!(draft.operation(), AlterTableOperation::RenameColumn);
+    assert_eq!(draft.reordered_columns().len(), 1);
+    assert_eq!(app.selected_alter_table_column(), None);
+}
+
+#[test]
+fn alter_table_revert_all_changes_restores_original_columns() {
+    let mut app = Akt::default();
+    app.connection_manager.set_driver(DatabaseDriver::MySql);
+    app.connection_manager
+        .set_field(ConnectionField::Database, String::from("myapp_db"));
+    app.alter_table_draft = Some(AlterTableDraft::new(String::from("users"), String::new()));
+    app.table_details = Some(TableDetails {
+        table: String::from("users"),
+        driver: DatabaseDriver::MySql,
+        sections: Vec::new(),
+        columns: vec![
+            TableColumnDetail {
+                name: String::from("id"),
+                data_type: String::from("BIGINT"),
+                nullable: String::from("NO"),
+                default_value: String::new(),
+                extra: String::new(),
+            },
+            TableColumnDetail {
+                name: String::from("name"),
+                data_type: String::from("VARCHAR(255)"),
+                nullable: String::from("YES"),
+                default_value: String::new(),
+                extra: String::new(),
+            },
+            TableColumnDetail {
+                name: String::from("created_at"),
+                data_type: String::from("TIMESTAMP"),
+                nullable: String::from("NO"),
+                default_value: String::from("CURRENT_TIMESTAMP"),
+                extra: String::new(),
+            },
+        ],
+        indexes: Vec::new(),
+        create_statement: String::from("CREATE TABLE users (id BIGINT);"),
+    });
+
+    let _ = app.update(Message::SelectAlterTableColumn(2));
+    let _ = app.update(Message::MoveSelectedAlterTableColumn(-1));
+    let _ = app.update(Message::RevertAllAlterTableChanges);
+
+    let draft = app
+        .alter_table_draft()
+        .expect("alter table draft should stay open");
+    assert_eq!(draft.operation(), AlterTableOperation::RenameColumn);
+    assert_eq!(draft.reordered_columns()[0].name, "id");
+    assert_eq!(draft.reordered_columns()[1].name, "name");
+    assert_eq!(draft.reordered_columns()[2].name, "created_at");
+    assert!(draft.index_name().is_empty());
+    assert!(draft.constraint_name().is_empty());
+    assert_eq!(app.selected_alter_table_column(), None);
+}
+
+#[test]
 fn alter_table_column_arrows_move_again_from_current_draft_order() {
     let mut app = Akt::default();
     app.connection_manager.set_driver(DatabaseDriver::MySql);
@@ -780,6 +873,48 @@ fn alter_table_column_arrows_move_again_from_current_draft_order() {
         .expect("alter table draft should stay open");
     assert_eq!(draft.reordered_columns()[0].name, "created_at");
     assert_eq!(draft.column_position(), "FIRST");
+}
+
+#[test]
+fn alter_table_first_column_move_up_does_not_overflow() {
+    let mut app = Akt::default();
+    app.connection_manager.set_driver(DatabaseDriver::MySql);
+    app.connection_manager
+        .set_field(ConnectionField::Database, String::from("myapp_db"));
+    app.alter_table_draft = Some(AlterTableDraft::new(String::from("users"), String::new()));
+    app.table_details = Some(TableDetails {
+        table: String::from("users"),
+        driver: DatabaseDriver::MySql,
+        sections: Vec::new(),
+        columns: vec![
+            TableColumnDetail {
+                name: String::from("id"),
+                data_type: String::from("BIGINT"),
+                nullable: String::from("NO"),
+                default_value: String::new(),
+                extra: String::new(),
+            },
+            TableColumnDetail {
+                name: String::from("name"),
+                data_type: String::from("VARCHAR(255)"),
+                nullable: String::from("YES"),
+                default_value: String::new(),
+                extra: String::new(),
+            },
+        ],
+        indexes: Vec::new(),
+        create_statement: String::new(),
+    });
+
+    let _ = app.update(Message::SelectAlterTableColumn(0));
+    let _ = app.update(Message::MoveSelectedAlterTableColumn(-1));
+
+    let draft = app
+        .alter_table_draft()
+        .expect("alter table draft should stay open");
+    assert_eq!(draft.operation(), AlterTableOperation::RenameColumn);
+    assert_eq!(draft.reordered_columns()[0].name, "id");
+    assert_eq!(draft.reordered_columns()[1].name, "name");
 }
 
 #[test]
@@ -1082,9 +1217,45 @@ fn index_column_chip_actions_update_create_and_alter_drafts() {
 
 #[test]
 fn default_language_is_simplified_chinese() {
-    let app = Akt::default();
+    let preferences = persistence::AppPreferences::default();
 
-    assert_eq!(app.language(), Language::ZhCn);
+    assert_eq!(Language::from_config(&preferences.language), Language::ZhCn);
+}
+
+#[test]
+fn gui_never_exposes_sql_or_plan_review_language() {
+    let checked_sources = [
+        include_str!("../app.rs"),
+        include_str!("../ui.rs"),
+        include_str!("../ui/database_workbench.rs"),
+        include_str!("../ui/dialogs.rs"),
+        include_str!("../ui/generic.rs"),
+        include_str!("../ui/query_workspace.rs"),
+        include_str!("../ui/schema_designer.rs"),
+        include_str!("../ui/schema_designer/alter_table.rs"),
+        include_str!("../ui/schema_designer/create_table.rs"),
+    ];
+    let forbidden = [
+        "Change Plan",
+        "变更计划",
+        "Review the Change Plan",
+        "按变更计划",
+        "blocked",
+        "阻塞",
+        "SQL editor",
+        "SQL formatting",
+        "Example SQL",
+        "DDL",
+    ];
+
+    for source in checked_sources {
+        for term in forbidden {
+            assert!(
+                !source.contains(term),
+                "GUI source must not expose forbidden term: {term}"
+            );
+        }
+    }
 }
 
 #[test]

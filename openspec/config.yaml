@@ -1,20 +1,65 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+context: |
+  项目：AktSQL Database Management，短名 Akt。
+  产品类型：GUI 数据库管理工具，不是 CLI 优先的数据库工具。
+  技术栈：Rust workspace，iced 桌面 UI，docs-site/ 中的 VuePress 官网。
+  主桌面应用 crate：crates/aktsql_app，Cargo package 和二进制名称为 aktsql。
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+  UX 基线：
+    - Akt 是高密度专业数据库 GUI，对齐 Navicat 类工作流。
+    - 除非未来规格变更，应用固定使用 1280x800 桌面内容目标。
+    - 左侧是对象定位器，右侧是上下文工作台。
+    - Query Console 是工具界面，不是 schema 操作主路径。
+    - Schema 操作优先使用结构化设计器和表单；新增表和修改表结构不得向用户展示、复制或要求审阅底层执行文本。
+    - 危险操作必须命名完整目标对象路径，并要求确认。
+
+  数据库最大公约数：
+    - 战略数据库族：MySQL Family、PostgreSQL Family、Document Family、SQL Server Family。
+    - MySQL Family 包含 MySQL、MariaDB、TiDB。
+    - PostgreSQL Family 包含 PostgreSQL、CockroachDB、Greenplum。
+    - Document Family 当前指 MongoDB。
+    - SQL Server Family 包含 SQL Server 和 SQL Server 2000 legacy mode。
+    - 使用统一对象模型：Connection -> Namespace -> Container -> Object Group -> Object。
+    - 不把所有数据库压平成“表”；保留 MongoDB collection/document 语义。
+    - 不混淆 PostgreSQL/SQL Server 的 database 和 schema。
+    - 为导航、日志、确认和复制动作生成并展示稳定对象路径。
+
+  必须保留的产品亮点：
+    - 跨数据库统一对象路径。
+    - 由能力元数据生成的驱动感知对象树。
+    - 真实连接画像，包括连接延迟、往返延迟、元数据延迟、服务端版本、编码/排序规则和能力摘要。
+    - 创建/修改执行前的 Schema Change Plan。
+    - 上下文动作系统，而不是堆叠式通用菜单。
+    - Schema 操作的可审计执行日志。
+
+  UI 与字体约束：
+    - 默认不打包 CJK/Latin/Arabic 字体；优先使用系统字体发现。
+    - macOS UI 字体优先级：PingFang SC，然后 Apple system fallback。
+    - Windows UI 字体优先级：Microsoft YaHei，然后 Segoe UI fallback。
+    - Linux UI 字体优先级：Noto Sans CJK、WenQuanYi Micro Hei、DejaVu Sans，然后 system sans。
+    - 等宽字体优先级：macOS 使用 Menlo/SF Mono，Windows 使用 Cascadia Mono/Consolas，Linux 使用 Noto Sans Mono CJK/DejaVu Sans Mono。
+    - Theme、density、row height、grid density、font policy 都是产品设置，不是临时 widget 调整。
+
+  Schema 设计器基线：
+    - 新建数据库、修改数据库、新建表、修改表必须使用像素稳定的设计器。
+    - 表设计器必须按场景包含 Fields、Indexes、Constraints、Options、Change Plan、Validation、Result、History。
+    - 字段网格必须使用驱动感知数据类型选项，不能只使用自由文本。
+    - 创建/修改表必须保留用户上下文，成功后刷新元数据，并保持操作对象被选中。
+    - 不支持的驱动操作必须说明无法运行的原因，不能伪装执行。
+
+rules:
+  proposal:
+    - 必须说明变更如何保持 GUI 数据库管理器工作流。
+    - 当连接、元数据、schema、查询或对象树行为变化时，必须指出受影响的数据库族。
+    - 变更涉及 UX、持久化、驱动或 schema 操作时，必须包含非目标。
+  design:
+    - 除非设计明确说明更窄模型的理由，否则使用统一对象模型。
+    - 保持 Query Console 与 schema 操作主路径分离。
+    - GUI 界面必须说明布局区域、稳定尺寸、用户动作、状态转换、校验、失败状态和刷新行为。
+    - Schema 操作必须包含 Change Plan、Validation、Apply/Execute、Revert、确认、执行结果和元数据刷新行为；新增表和修改表结构不得暴露底层执行文本作为 UX 步骤。
+    - 数据库专属行为必须区分通用行为与驱动/数据库族专属行为。
+  tasks:
+    - 适用时按模型、状态、UI、执行、持久化/日志、验证拆分任务。
+    - 必须包含 OpenSpec 和相关 Rust 检查任务。
+    - 像素敏感 GUI 变更必须包含截图或布局验证任务。

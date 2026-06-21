@@ -1,14 +1,14 @@
-## Why
+## 为什么
 
-The prototype includes an Appearance Settings workspace, but the Rust desktop app still shows a generic placeholder for Settings. The app needs a real settings surface so the shell feels cohesive and can later persist appearance preferences.
+原型包含“外观设置”工作区，但 Rust 桌面应用的设置页仍显示通用占位。应用需要真实设置界面，让主壳更完整，并为后续持久化外观偏好做好准备。
 
-## What Changes
+## 变更内容
 
-- Replace the Settings placeholder with an Appearance Settings workspace.
-- Add prototype-aligned panels for theme, density, typography, keybindings, and configuration actions.
-- Reuse the existing theme toggle path for the first Apply Configuration interaction.
+- 用“外观设置”工作区替换设置页占位。
+- 添加与原型对齐的面板：主题、密度、字体、快捷键和配置操作。
+- 为第一版“应用配置”交互复用现有主题切换路径。
 
-## Impact
+## 影响
 
-- Affected code: `crates/aktsql_app/src/ui.rs`
-- Affected specs: `appearance-settings`
+- 受影响代码：`crates/aktsql_app/src/ui.rs`
+- 受影响 specs：`appearance-settings`

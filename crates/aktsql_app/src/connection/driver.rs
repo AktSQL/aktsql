@@ -210,15 +210,13 @@ pub enum DatabaseDriver {
 }
 
 impl DatabaseDriver {
-    pub const ALL: [DatabaseDriver; 9] = [
+    pub const ALL: [DatabaseDriver; 7] = [
         DatabaseDriver::MySql,
         DatabaseDriver::MariaDb,
         DatabaseDriver::TiDb,
         DatabaseDriver::PostgreSql,
         DatabaseDriver::CockroachDb,
         DatabaseDriver::Sqlite,
-        DatabaseDriver::SqlServer,
-        DatabaseDriver::Oracle,
         DatabaseDriver::MongoDb,
     ];
 

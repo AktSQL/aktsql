@@ -37,6 +37,26 @@ impl Language {
             Self::JaJp => "日本語",
         }
     }
+
+    pub fn config_value(self) -> &'static str {
+        match self {
+            Self::EnUs => "en_us",
+            Self::FrFr => "fr_fr",
+            Self::RuRu => "ru_ru",
+            Self::ZhCn => "zh_cn",
+            Self::JaJp => "ja_jp",
+        }
+    }
+
+    pub fn from_config(value: &str) -> Self {
+        match value {
+            "en_us" => Self::EnUs,
+            "fr_fr" => Self::FrFr,
+            "ru_ru" => Self::RuRu,
+            "ja_jp" => Self::JaJp,
+            _ => Self::ZhCn,
+        }
+    }
 }
 
 impl fmt::Display for Language {

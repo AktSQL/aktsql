@@ -101,9 +101,11 @@ pub(super) fn schema_delete_confirmation_dialog(
         SchemaDeletionKind::Database => texts.drop_database,
         SchemaDeletionKind::Table => texts.delete_table,
     };
-    let body = match kind {
-        SchemaDeletionKind::Database => format!("DROP DATABASE {target}?"),
-        SchemaDeletionKind::Table => format!("DROP TABLE {target}?"),
+    let body = match (state.language(), kind) {
+        (Language::ZhCn, SchemaDeletionKind::Database) => format!("确认删除数据库 {target}？"),
+        (Language::ZhCn, SchemaDeletionKind::Table) => format!("确认删除表 {target}？"),
+        (_, SchemaDeletionKind::Database) => format!("Delete database {target}?"),
+        (_, SchemaDeletionKind::Table) => format!("Delete table {target}?"),
     };
 
     container(

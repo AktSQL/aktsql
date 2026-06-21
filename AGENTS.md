@@ -1,93 +1,93 @@
-# Akt Agent Guide
+# Akt Agent 指南
 
-## 1. Project Snapshot
+## 1. 项目快照
 
-This project is intended to become **AktSQL Database Management**.
-The product short name is `Akt`.
+本项目目标是成为 **AktSQL Database Management**。
+产品短名为 `Akt`。
 
-Current repository state:
-- The repo contains project notes, OpenSpec configuration, Cursor helper assets, CodeGraph metadata, and the initial Rust desktop application scaffold.
-- The committed implementation stack is Rust with iced for the desktop UI.
-- The first app crate is `crates/aktsql_app`, with the Cargo package and binary named `aktsql`.
+当前仓库状态：
+- 仓库包含项目说明、OpenSpec 配置、Cursor 辅助资产、CodeGraph 元数据，以及初始 Rust 桌面应用脚手架。
+- 已提交的实现技术栈是 Rust，桌面 UI 使用 iced。
+- 第一个应用 crate 是 `crates/aktsql_app`，Cargo package 和二进制名称均为 `aktsql`。
 
-## 2. Product Notes
+## 2. 产品说明
 
-Known project intent from `README.md`:
-- Primary CLI command: `aktsql`
-- Short CLI alias: not defined yet.
-- Candidate config files:
+从 `README.md` 可确认的项目意图：
+- 主 CLI 命令：`aktsql`
+- 短 CLI 别名：暂未定义。
+- 候选配置文件：
   - `.aktsql.toml`
   - `aktsql.config.json`
-- Branding:
-  - Main visual: red cloud
-  - Colors: black and red
-  - Tone: mysterious and powerful
-- Candidate slogans: `Dawn of Database Management`, `Powerful as the Organization`
+- 品牌：
+  - 主视觉：红云
+  - 配色：黑色与红色
+  - 调性：神秘、强大
+- 候选标语：`Dawn of Database Management`（数据库管理的黎明）、`Powerful as the Organization`（如组织般强大）
 
-## 3. Repository Map
+## 3. 仓库地图
 
-Important paths:
-- `README.md` - current product notes.
-- `Cargo.toml` - Rust workspace configuration.
-- `crates/aktsql_app/` - initial iced desktop application.
-- `docs/product/aktsql-requirement-slices.md` - product requirement slices derived from prototypes.
-- `openspec/config.yaml` - OpenSpec configuration.
-- `.cursor/commands/` and `.cursor/skills/` - Cursor and OpenSpec helpers.
-- `.codegraph/` - local CodeGraph index files.
-- `AGENTS.md` - this guide.
+重要路径：
+- `README.md` - 当前产品说明。
+- `Cargo.toml` - Rust workspace 配置。
+- `crates/aktsql_app/` - 初始 iced 桌面应用。
+- `docs/product/aktsql-requirement-slices.md` - 从原型拆出的产品需求切片。
+- `openspec/config.yaml` - OpenSpec 配置。
+- `.cursor/commands/` 和 `.cursor/skills/` - Cursor 与 OpenSpec 辅助文件。
+- `.codegraph/` - 本地 CodeGraph 索引文件。
+- `AGENTS.md` - 本指南。
 
 ## 4. CodeGraph
 
-This project has a CodeGraph MCP server configured.
-Use CodeGraph for structural code questions once source code exists.
+本项目已配置 CodeGraph MCP server。
+源代码存在后，结构性代码问题优先使用 CodeGraph。
 
-Prefer these tools:
-- `codegraph_files` for project file structure.
-- `codegraph_context` for broad task context.
-- `codegraph_search` for symbol definitions.
-- `codegraph_node` for one symbol's signature or source.
-- `codegraph_callers`, `codegraph_callees`, `codegraph_trace`, and `codegraph_impact` for relationships and change impact.
+优先使用这些工具：
+- `codegraph_files` 查看项目文件结构。
+- `codegraph_context` 获取宽范围任务上下文。
+- `codegraph_search` 查找符号定义。
+- `codegraph_node` 查看单个符号的签名或源码。
+- `codegraph_callers`、`codegraph_callees`、`codegraph_trace` 和 `codegraph_impact` 分析调用关系与变更影响。
 
-Use native shell search only for literal text queries, generated files, or files not represented in CodeGraph.
+只有在查询字面文本、生成文件或 CodeGraph 未覆盖的文件时，才使用原生 shell 搜索。
 
-## 5. OpenSpec Workflow
+## 5. OpenSpec 工作流
 
-The repository is configured for spec-driven work via `openspec/config.yaml`.
-For substantial features, clarify or create an OpenSpec change before implementing source code.
+仓库通过 `openspec/config.yaml` 配置了规格驱动工作流。
+实现重要功能前，应先澄清或创建 OpenSpec 变更。
 
-Use OpenSpec-style work when:
-- Adding the first application scaffold.
-- Choosing the implementation stack.
-- Defining CLI commands and flags.
-- Defining database connection behavior.
-- Adding config file semantics.
-- Introducing persisted state, plugins, or migrations.
+以下场景使用 OpenSpec 风格工作：
+- 添加第一个应用脚手架。
+- 选择实现技术栈。
+- 定义 CLI 命令和参数。
+- 定义数据库连接行为。
+- 添加配置文件语义。
+- 引入持久化状态、插件或迁移。
 
-Small documentation edits can be made directly.
+小型文档编辑可以直接修改。
 
-## 6. Implementation Rules
+## 6. 实现规则
 
-Implementation stack:
-- Rust workspace.
-- iced desktop UI.
-- Follow Cargo workspace conventions.
-- Keep UI, application state, theme, database drivers, metadata, query execution, SQL tooling, and configuration in separate modules or crates as they grow.
-- Preserve Unix-style boundaries: small modules, explicit state transitions, text-friendly configuration, and testable core logic that is not tied to the UI framework.
+实现技术栈：
+- Rust workspace。
+- iced 桌面 UI。
+- 遵循 Cargo workspace 约定。
+- 随着项目增长，将 UI、应用状态、主题、数据库驱动、元数据、查询执行、SQL 工具和配置拆分到独立模块或 crate。
+- 保持 Unix 风格边界：小模块、显式状态转换、文本友好配置，以及不绑定 UI 框架的可测试核心逻辑。
 
-## 7. Editing Rules
+## 7. 编辑规则
 
-Follow the existing repo shape and keep changes scoped.
+遵循现有仓库形态，保持变更范围收敛。
 
-- Prefer small, direct edits.
-- Avoid unrelated formatting churn.
-- Preserve user changes in the working tree.
-- Use structured parsers or standard tools when modifying structured files.
-- Keep comments useful and sparse.
-- Use ASCII unless a file already needs non-ASCII text.
+- 优先做小而直接的编辑。
+- 避免无关格式化 churn。
+- 保留工作区中的用户改动。
+- 修改结构化文件时使用结构化解析器或标准工具。
+- 注释保持有用且克制。
+- 除非文件本身需要非 ASCII 文本，否则使用 ASCII。
 
-## 8. Verification
+## 8. 验证
 
-Current useful checks are:
+当前有用的检查命令：
 
 ```sh
 cargo fmt --check
@@ -95,21 +95,21 @@ cargo check
 rg --files -uu
 ```
 
-Run the desktop app:
+运行桌面应用：
 
 ```sh
 cargo run -p aktsql
 ```
 
-## 9. Git State
+## 9. Git 状态
 
-`.git/` exists. Preserve user changes and avoid reverting unrelated work.
+`.git/` 存在。保留用户改动，避免回退无关工作。
 
-## 10. First Scaffold Checklist
+## 10. 首个脚手架检查清单
 
-The first scaffold has selected Rust + iced. Before implementing database features, decide:
-- Supported database engines for the first version.
-- Driver crate strategy and optional feature layout.
-- Configuration file precedence.
-- Secure credential storage approach.
-- Test strategy for database integrations.
+首个脚手架已选择 Rust + iced。实现数据库功能前，需要决定：
+- 第一版支持的数据库引擎。
+- 驱动 crate 策略与可选 feature 布局。
+- 配置文件优先级。
+- 安全凭据存储方案。
+- 数据库集成测试策略。

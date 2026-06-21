@@ -3,7 +3,10 @@ use super::*;
 impl Default for Akt {
     fn default() -> Self {
         let profiles = persistence::load_connection_profiles().unwrap_or_default();
-        let language = Language::ZhCn;
+        let preferences = persistence::load_preferences().unwrap_or_default();
+        let language = Language::from_config(&preferences.language);
+        let theme = ThemeMode::from_config(&preferences.theme);
+        let ui_font_preference = UiFontPreference::from_config(&preferences.ui_font);
         let texts = i18n::texts(language);
         let status_message = if profiles.is_empty() {
             String::from(texts.ready)
@@ -18,15 +21,13 @@ impl Default for Akt {
 
         Self {
             selected: Section::Databases,
-            theme: ThemeMode::Dark,
+            theme,
             language,
-            language_menu_open: false,
+            ui_font_preference,
             connection_manager: ConnectionManager::with_profiles(profiles),
             query_workspace: QueryWorkspace::default(),
-            query_editor: text_editor::Content::with_text(QueryWorkspace::DEFAULT_SQL),
             result_row_count: 0,
             result_latency_ms: None,
-            query_result_order_by: Vec::new(),
             query_running: false,
             schema_loading: false,
             schema_mutation_running: false,

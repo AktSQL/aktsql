@@ -1,48 +1,48 @@
-## 1. Connection Model
+## 1. 连接模型
 
-- [x] 1.1 Add a focused connection module with driver enum, form state, saved profile, defaults, and validation.
-- [x] 1.2 Wire connection state into the application state without mixing UI rendering into the model.
+- [x] 1.1 添加聚焦的连接模块，包含驱动 enum、表单状态、已保存配置、默认值和校验。
+- [x] 1.2 将连接状态接入应用状态，但不把 UI 渲染混入模型。
 
-## 2. Application Messages
+## 2. 应用消息
 
-- [x] 2.1 Add messages for editing connection fields, selecting drivers, testing, saving, creating, selecting, and deleting profiles.
-- [x] 2.2 Update the app reducer so connection actions update form/list/status deterministically.
+- [x] 2.1 添加消息，用于编辑连接字段、选择驱动、测试、保存、创建、选择和删除配置。
+- [x] 2.2 更新 app reducer，让连接操作以确定方式更新表单、列表和状态。
 
-## 3. Desktop UI
+## 3. 桌面 UI
 
-- [x] 3.1 Replace the Databases placeholder with a connection manager surface.
-- [x] 3.2 Add connection list, driver selector, parameter fields, toggles, validation feedback, and action buttons.
+- [x] 3.1 用连接管理界面替换 Databases 占位。
+- [x] 3.2 添加连接列表、驱动选择器、参数字段、开关、校验反馈和操作按钮。
 
-## 4. Verification
+## 4. 验证
 
-- [x] 4.1 Run Rust formatting and compiler checks.
-- [x] 4.2 Confirm OpenSpec reports the change artifacts and task list as complete.
+- [x] 4.1 运行 Rust 格式化和编译检查。
+- [x] 4.2 确认 OpenSpec 报告 change artifacts 和任务清单已完成。
 
-## 5. Connector Interface
+## 5. 连接器接口
 
-- [x] 5.1 Add a focused connector interface and local tester for connection test flow handoff.
-- [x] 5.2 Add real SQLite connection testing through rusqlite.
+- [x] 5.1 添加聚焦的连接器接口和本地 tester，用于交接连接测试流程。
+- [x] 5.2 通过 rusqlite 添加真实 SQLite 连接测试。
 
-## 6. Product Polish
+## 6. 产品打磨
 
-- [x] 6.1 Fix fixed-size window behavior and remove maximize from the custom title bar.
-- [x] 6.2 Restore the prototype logo and normalize title/sidebar copy for later i18n.
-- [x] 6.3 Expand the connection driver list to include broad market coverage including SQL Server 2000.
-- [x] 6.4 Recalibrate Connections Settings against the prototype with fixed logo spacing, narrower form width, underline-style inputs, switch-like connection options, and a delete action.
-- [x] 6.5 Reduce Connections layout drift by centering the bounded settings form in the right work area, converting profile cards to single-click rows, trimming card height, and fixing the app window to its prototype size.
-- [x] 6.6 Align the Databases sidebar/header with the connection-manager prototype by removing duplicate shell controls and using the prototype-style connection list header.
-- [x] 6.7 Tighten the Connections screen against `stitch_aktsql_database_management` by matching the 347px list column, visible form fields, bordered inputs, pill toggles, action row spacing, legacy warning block, and logo asset proportions.
-- [x] 6.8 Recalibrate the desktop shell to the prototype screenshot scale by using a 1600x1264 fixed window, 60px top bar, 30px footer, 300px sidebar, 434px connection list, seeded prototype profiles, and scaled form/list typography.
-- [x] 6.9 Return the app to the original 1280x800 fixed window and scale the prototype-aligned shell back down proportionally while retaining seeded prototype profiles and layout structure.
-- [x] 6.10 Compress the 1280x800 Connections layout for Windows-targeted iced rendering by reducing vertical form density, forcing prototype profiles ahead of persisted profiles, clipping the title-bar logo, and screenshot-checking the result.
-- [x] 6.11 Add a working connection list filter cycle and soften border treatments by reducing default outline opacity while preserving active/hover contrast.
-- [x] 6.12 Continue Connections functionality by adding list search, persisted-profile reload, context-aware top-bar actions, visible advanced connection parameters, and softer underline-style form inputs.
-- [x] 6.13 Convert charset from free text to a driver-aware dropdown with per-database option sets and model-side normalization.
-- [x] 6.14 Link charset and collation dropdowns so collation options update by selected charset, including expanded MySQL utf8mb4 collations such as `utf8mb4_0900_ai_ci`, `utf8mb4_general_ci`, and `utf8mb4_unicode_ci`.
-- [x] 6.15 Expand MySQL-family charset coverage and add regression checks for charset/collation linkage and normalization.
-- [x] 6.16 Polish the custom title bar with real minimize/close commands, i18n switching, normal Akt casing, aligned branding, MySQL default draft state, pick-list menu padding, and a black/red app frame.
-- [x] 6.17 Add bundled CJK font rendering, expand the language cycle to EN/ZH/JA/KO, localize the main visible UI surfaces, and recenter the red-cloud logo asset itself.
-- [x] 6.18 Replace language cycling with an explicit EN/FR/DE/RU/AR/ZH/JA/KO dropdown, remove global i18n state, bundle Latin/Arabic/CJK font coverage, make the logo transparent red-cloud only, and replace text radio glyphs with fixed aligned controls.
-- [x] 6.19 Trim database choices to mainstream engines plus SQLite file profiles, replace the crashing language pick-list overlay with an in-app language tray, limit i18n choices to EN/FR/RU/ZH/JA, and restyle placeholder workspaces to match the connection surface.
-- [x] 6.20 Restore the language selector to a compact dropdown shape without using the crashing native pick-list overlay, and rebuild the brand mark as one container with red cloud, fixed spacing, and Akt text.
-- [x] 6.21 Start structural cleanup by splitting database driver metadata, seeded connection profiles, language identity, shell/title-bar UI, and generic placeholder workspace code into focused Rust submodules.
+- [x] 6.1 修复固定尺寸窗口行为，并从自定义标题栏移除最大化。
+- [x] 6.2 恢复原型 logo，并规范标题/侧栏文案，为后续 i18n 做准备。
+- [x] 6.3 扩展连接驱动列表，覆盖广泛市场需求，包括 SQL Server 2000。
+- [x] 6.4 按原型重新校准 Connections Settings：固定 logo 间距、更窄表单宽度、下划线输入、类似开关的连接选项和删除操作。
+- [x] 6.5 将有界设置表单居中放在右侧工作区、把配置卡片改为单击行、缩短卡片高度、将应用窗口固定为原型尺寸，从而减少 Connections 布局漂移。
+- [x] 6.6 移除重复 shell 控件，并使用原型风格连接列表标题，让 Databases 侧栏/表头与连接管理器原型对齐。
+- [x] 6.7 对照 `stitch_aktsql_database_management` 收紧 Connections 页面，匹配 347px 列表列、可见表单字段、带边框输入、pill toggles、操作行间距、legacy warning 区块和 logo 资产比例。
+- [x] 6.8 将桌面主壳重新校准到原型截图比例：1600x1264 固定窗口、60px 顶栏、30px 页脚、300px 侧栏、434px 连接列表、种子原型配置，以及缩放后的表单/列表字体。
+- [x] 6.9 将应用恢复到原始 1280x800 固定窗口，并按比例缩回原型对齐主壳，同时保留种子原型配置和布局结构。
+- [x] 6.10 面向 Windows 目标 iced 渲染压缩 1280x800 Connections 布局：降低垂直表单密度、强制原型配置排在持久化配置前、裁剪标题栏 logo，并用截图检查结果。
+- [x] 6.11 添加可工作的连接列表过滤循环，并降低默认轮廓不透明度以柔化边框，同时保留 active/hover 对比。
+- [x] 6.12 继续补全 Connections 功能：添加列表搜索、持久化配置重载、上下文感知顶栏操作、可见高级连接参数，以及更柔和的下划线表单输入。
+- [x] 6.13 将字符集从自由文本改为驱动感知下拉框，并提供按数据库划分的选项集和模型侧规范化。
+- [x] 6.14 联动字符集和排序规则下拉框，让排序规则选项随所选字符集更新，包括扩展 MySQL utf8mb4 排序规则，如 `utf8mb4_0900_ai_ci`、`utf8mb4_general_ci` 和 `utf8mb4_unicode_ci`。
+- [x] 6.15 扩展 MySQL family 字符集覆盖，并添加字符集/排序规则联动和规范化回归检查。
+- [x] 6.16 打磨自定义标题栏：真实最小化/关闭命令、i18n 切换、正常 Akt 大小写、对齐品牌、MySQL 默认草稿状态、pick-list 菜单内边距，以及黑红应用框架。
+- [x] 6.17 添加内置 CJK 字体渲染，将语言循环扩展为 EN/ZH/JA/KO，本地化主要可见 UI 界面，并重新居中红云 logo 资产。
+- [x] 6.18 用明确的 EN/FR/DE/RU/AR/ZH/JA/KO 下拉框替换语言循环，移除全局 i18n 状态，内置 Latin/Arabic/CJK 字体覆盖，让 logo 只保留透明红云，并用固定对齐控件替换文本 radio glyph。
+- [x] 6.19 将数据库选择裁剪为主流引擎和 SQLite 文件配置，用应用内语言托盘替换会崩溃的 language pick-list overlay，将 i18n 选择限制为 EN/FR/RU/ZH/JA，并把占位工作区重设为与连接界面一致的样式。
+- [x] 6.20 将语言选择器恢复为紧凑下拉形状，不使用会崩溃的 native pick-list overlay，并将品牌标识重建为一个容器，包含红云、固定间距和 Akt 文本。
+- [x] 6.21 开始结构清理：将数据库驱动元数据、种子连接配置、语言身份、shell/title-bar UI 和通用占位工作区代码拆分到聚焦 Rust 子模块。

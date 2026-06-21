@@ -7,10 +7,6 @@ pub(in crate::ui) fn alter_table_designer_panel<'a>(
 ) -> Element<'a, Message> {
     let texts = i18n::texts(state.language());
     let tab = state.alter_table_tab();
-    let can_apply = matches!(
-        tab,
-        AlterTableTab::Columns | AlterTableTab::Indexes | AlterTableTab::Constraints
-    );
     let header = row![
         column![
             text(texts.modify_structure)
@@ -24,37 +20,24 @@ pub(in crate::ui) fn alter_table_designer_panel<'a>(
         ]
         .spacing(3)
         .width(Length::Fill),
+        small_command_button(
+            alter_table_revert_selected_label(state.language()),
+            Message::RevertSelectedAlterTableChange,
+        ),
+        small_command_button(
+            alter_table_revert_all_label(state.language()),
+            Message::RevertAllAlterTableChanges,
+        ),
         button(button_label(texts.cancel, 11))
             .height(28)
             .padding([0, 12])
             .style(theme::secondary_button)
             .on_press(Message::CancelTableEdit),
-        alter_table_apply_button(can_apply, state.language()),
+        alter_table_apply_button(true, state.language()),
     ]
     .spacing(10)
     .align_y(Alignment::Center);
-    let operation = row![
-        text(texts.alter_operation)
-            .size(10)
-            .wrapping(Wrapping::None)
-            .style(theme::secondary_text),
-        container(
-            text(draft.operation().label())
-                .size(10)
-                .wrapping(Wrapping::None)
-                .style(theme::on_primary_text),
-        )
-        .style(theme::status_chip)
-        .padding([3, 8]),
-    ]
-    .spacing(8)
-    .align_y(Alignment::Center);
-    let mut content = column![
-        header,
-        operation,
-        alter_table_tab_bar(tab, state.language()),
-    ]
-    .spacing(12);
+    let mut content = column![header, alter_table_tab_bar(tab, state.language())].spacing(12);
 
     content = content.push(alter_table_tab_content(state, tab, draft));
 
@@ -63,6 +46,20 @@ pub(in crate::ui) fn alter_table_designer_panel<'a>(
         .padding([12, 14])
         .width(Length::Fill)
         .into()
+}
+
+fn alter_table_revert_selected_label(language: Language) -> &'static str {
+    match language {
+        Language::ZhCn => "回退选中",
+        _ => "Revert Selected",
+    }
+}
+
+fn alter_table_revert_all_label(language: Language) -> &'static str {
+    match language {
+        Language::ZhCn => "回退全部",
+        _ => "Revert All",
+    }
 }
 
 fn alter_table_apply_button(enabled: bool, language: Language) -> Element<'static, Message> {
@@ -101,7 +98,11 @@ fn alter_table_tab_button(
         text(label.to_uppercase())
             .size(10)
             .wrapping(Wrapping::None)
-            .style(theme::on_surface_text),
+            .style(if active {
+                theme::on_primary_text
+            } else {
+                theme::on_surface_text
+            }),
     )
     .height(26)
     .padding([0, 12])
@@ -123,7 +124,6 @@ fn alter_table_tab_content<'a>(
         AlterTableTab::Columns => alter_table_columns_tab(state, draft),
         AlterTableTab::Indexes => alter_table_indexes_tab(state, draft),
         AlterTableTab::Constraints => alter_table_constraints_tab(state, draft),
-        AlterTableTab::Ddl => alter_table_ddl_tab(state, draft),
     }
 }
 
@@ -133,7 +133,6 @@ fn alter_table_tab_label(tab: AlterTableTab, language: Language) -> &'static str
         AlterTableTab::Columns => texts.columns,
         AlterTableTab::Indexes => texts.indexes,
         AlterTableTab::Constraints => texts.constraints,
-        AlterTableTab::Ddl => texts.ddl,
     }
 }
 
@@ -167,8 +166,18 @@ fn alter_table_existing_columns_panel<'a>(state: &'a Akt) -> Element<'a, Message
 
     let driver = state.connection_manager().form().driver;
     let language = state.language();
-    let original_column_count = details.columns.len();
+    let original_column_names = details
+        .columns
+        .iter()
+        .map(|column| column.name.as_str())
+        .collect::<Vec<_>>();
     let selected_column = state.selected_alter_table_column();
+    let pending_add_index = columns.iter().position(|column| {
+        !original_column_names
+            .iter()
+            .any(|name| name.eq_ignore_ascii_case(&column.name))
+    });
+    let has_pending_add = pending_add_index.is_some();
     let rows = columns.iter().enumerate().fold(
         column![alter_table_existing_columns_header(language)].spacing(6),
         |column, (index, column_detail)| {
@@ -176,7 +185,8 @@ fn alter_table_existing_columns_panel<'a>(state: &'a Akt) -> Element<'a, Message
                 driver,
                 index,
                 column_detail,
-                index >= original_column_count,
+                pending_add_index == Some(index),
+                has_pending_add,
                 selected_column == Some(index),
             ))
         },
@@ -187,7 +197,7 @@ fn alter_table_existing_columns_panel<'a>(state: &'a Akt) -> Element<'a, Message
             row![
                 detail_section_label(texts.columns),
                 Space::with_width(Length::Fill),
-                alter_table_column_toolbar(selected_column),
+                alter_table_column_toolbar(selected_column, columns.len(), pending_add_index),
             ]
             .align_y(Alignment::Center),
             rows,
@@ -221,22 +231,79 @@ fn alter_table_existing_column_row<'a>(
     index: usize,
     column_detail: &'a crate::query::TableColumnDetail,
     pending_add: bool,
+    has_pending_add: bool,
     selected: bool,
 ) -> Element<'a, Message> {
     let actions = if pending_add {
-        row![icon_danger_button(
+        row![icon_danger_button_enabled(
             "-",
-            Message::RemoveAlterTableColumn(index)
+            Some(Message::RemoveAlterTableColumn(index))
         )]
         .spacing(4)
         .align_y(Alignment::Center)
     } else {
-        row![icon_command_button(
+        row![icon_command_button_enabled(
             "#",
-            Message::AddAlterTableIndexForColumn(index)
+            (!has_pending_add).then_some(Message::AddAlterTableIndexForColumn(index))
         )]
         .spacing(4)
         .align_y(Alignment::Center)
+    };
+    let data_type_cell = if pending_add {
+        form_slot(
+            alter_table_column_type_pick_list(driver, &column_detail.data_type, index),
+            2,
+        )
+    } else {
+        form_slot(
+            readonly_index_cell(column_detail.data_type.clone(), index),
+            2,
+        )
+    };
+    let nullable_cell = if pending_add {
+        form_slot(
+            alter_table_column_input(
+                "YES",
+                &column_detail.nullable,
+                index,
+                CreateTableColumnField::Nullable,
+            ),
+            1,
+        )
+    } else {
+        form_slot(
+            readonly_index_cell(column_detail.nullable.clone(), index),
+            1,
+        )
+    };
+    let default_value_cell = if pending_add {
+        form_slot(
+            alter_table_column_input(
+                "CURRENT_TIMESTAMP",
+                &column_detail.default_value,
+                index,
+                CreateTableColumnField::DefaultValue,
+            ),
+            2,
+        )
+    } else {
+        form_slot(
+            readonly_index_cell(column_detail.default_value.clone(), index),
+            2,
+        )
+    };
+    let extra_cell = if pending_add {
+        form_slot(
+            alter_table_column_input(
+                "AUTO_INCREMENT",
+                &column_detail.extra,
+                index,
+                CreateTableColumnField::Extra,
+            ),
+            2,
+        )
+    } else {
+        form_slot(readonly_index_cell(column_detail.extra.clone(), index), 2)
     };
 
     container(
@@ -255,37 +322,10 @@ fn alter_table_existing_column_row<'a>(
                 ),
                 2,
             ),
-            form_slot(
-                alter_table_column_type_pick_list(driver, &column_detail.data_type, index),
-                2,
-            ),
-            form_slot(
-                alter_table_column_input(
-                    "YES",
-                    &column_detail.nullable,
-                    index,
-                    CreateTableColumnField::Nullable,
-                ),
-                1,
-            ),
-            form_slot(
-                alter_table_column_input(
-                    "CURRENT_TIMESTAMP",
-                    &column_detail.default_value,
-                    index,
-                    CreateTableColumnField::DefaultValue,
-                ),
-                2,
-            ),
-            form_slot(
-                alter_table_column_input(
-                    "AUTO_INCREMENT",
-                    &column_detail.extra,
-                    index,
-                    CreateTableColumnField::Extra,
-                ),
-                2,
-            ),
+            data_type_cell,
+            nullable_cell,
+            default_value_cell,
+            extra_cell,
             actions,
         ]
         .spacing(8)
@@ -296,15 +336,35 @@ fn alter_table_existing_column_row<'a>(
     .into()
 }
 
-fn alter_table_column_toolbar(selected_column: Option<usize>) -> Element<'static, Message> {
-    let delete_message = selected_column
-        .map(|_| Message::RemoveSelectedAlterTableColumn)
-        .unwrap_or(Message::RemoveSelectedAlterTableColumn);
+fn alter_table_column_toolbar(
+    selected_column: Option<usize>,
+    column_count: usize,
+    pending_add_index: Option<usize>,
+) -> Element<'static, Message> {
+    let has_pending_add = pending_add_index.is_some();
+    let can_add = !has_pending_add;
+    let can_remove = selected_column.is_some_and(|index| pending_add_index == Some(index));
+    let can_move_up = selected_column.is_some_and(|index| !has_pending_add && index > 0);
+    let can_move_down =
+        selected_column.is_some_and(|index| !has_pending_add && index + 1 < column_count);
+
     row![
-        icon_command_button("+", Message::InsertAlterTableColumnAfterSelection),
-        icon_command_button("×", delete_message),
-        icon_command_button("▲", Message::MoveSelectedAlterTableColumn(-1)),
-        icon_command_button("▼", Message::MoveSelectedAlterTableColumn(1)),
+        icon_command_button_enabled(
+            "+",
+            can_add.then_some(Message::InsertAlterTableColumnAfterSelection)
+        ),
+        icon_danger_button_enabled(
+            "×",
+            can_remove.then_some(Message::RemoveSelectedAlterTableColumn)
+        ),
+        icon_command_button_enabled(
+            "▲",
+            can_move_up.then_some(Message::MoveSelectedAlterTableColumn(-1))
+        ),
+        icon_command_button_enabled(
+            "▼",
+            can_move_down.then_some(Message::MoveSelectedAlterTableColumn(1))
+        ),
     ]
     .spacing(5)
     .align_y(Alignment::Center)
@@ -603,47 +663,4 @@ fn alter_table_constraints_tab<'a>(
     .padding(10)
     .width(Length::Fill)
     .into()
-}
-
-fn alter_table_ddl_tab<'a>(state: &'a Akt, draft: &'a AlterTableDraft) -> Element<'a, Message> {
-    let language = state.language();
-    let texts = i18n::texts(language);
-    container(
-        column![
-            alter_table_create_statement_block(language, draft, 118),
-            sql_preview_block(
-                language,
-                texts.alter_table_statement,
-                state.alter_table_sql_preview(draft),
-                Message::CopyAlterTableSql,
-                118,
-            ),
-        ]
-        .spacing(10),
-    )
-    .style(theme::panel_low)
-    .padding(10)
-    .width(Length::Fill)
-    .into()
-}
-
-fn alter_table_create_statement_block<'a>(
-    language: Language,
-    draft: &'a AlterTableDraft,
-    height: u16,
-) -> Element<'a, Message> {
-    let texts = i18n::texts(language);
-    let create_statement = if draft.create_statement().trim().is_empty() {
-        texts.create_statement_loading.to_owned()
-    } else {
-        draft.create_statement().to_owned()
-    };
-
-    sql_preview_block(
-        language,
-        texts.create_table_statement,
-        create_statement,
-        Message::CopyAlterTableCreateSql,
-        height,
-    )
 }

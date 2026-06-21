@@ -10,6 +10,42 @@ pub struct ConnectionTestReport {
     pub driver: DatabaseDriver,
     pub target: String,
     pub elapsed_ms: u128,
+    pub connect_latency_ms: u128,
+    pub roundtrip_latency_ms: u128,
+    pub metadata_latency_ms: Option<u128>,
+    pub server_version: Option<String>,
+    pub encoding: Option<String>,
+}
+
+impl ConnectionTestReport {
+    pub fn latency_summary(&self) -> String {
+        let metadata = self
+            .metadata_latency_ms
+            .map(|latency| format!("{latency} ms metadata"))
+            .unwrap_or_else(|| String::from("-- metadata"));
+
+        format!(
+            "{} ms total · {} ms connect · {} ms query · {metadata}",
+            self.elapsed_ms, self.connect_latency_ms, self.roundtrip_latency_ms
+        )
+    }
+
+    pub fn status_summary(&self) -> String {
+        let mut parts = vec![
+            format!("{} at {}", self.driver, self.target),
+            self.latency_summary(),
+        ];
+
+        if let Some(version) = self.server_version.as_deref() {
+            parts.push(format!("server {version}"));
+        }
+
+        if let Some(encoding) = self.encoding.as_deref() {
+            parts.push(encoding.to_owned());
+        }
+
+        parts.join(" · ")
+    }
 }
 
 pub fn test_connection(form: ConnectionForm) -> Result<ConnectionTestReport, Vec<String>> {
@@ -17,7 +53,7 @@ pub fn test_connection(form: ConnectionForm) -> Result<ConnectionTestReport, Vec
 
     let start = Instant::now();
     let target = connection_target(&form);
-    match form.driver {
+    let probe = match form.driver {
         DatabaseDriver::Sqlite => test_sqlite(&form),
         DatabaseDriver::MySql | DatabaseDriver::MariaDb | DatabaseDriver::TiDb => {
             test_mysql(&form)
@@ -34,34 +70,97 @@ pub fn test_connection(form: ConnectionForm) -> Result<ConnectionTestReport, Vec
         driver: form.driver,
         target,
         elapsed_ms: start.elapsed().as_millis(),
+        connect_latency_ms: probe.connect_latency_ms,
+        roundtrip_latency_ms: probe.roundtrip_latency_ms,
+        metadata_latency_ms: probe.metadata_latency_ms,
+        server_version: probe.server_version,
+        encoding: probe.encoding,
     })
 }
 
-fn test_sqlite(form: &ConnectionForm) -> Result<String, String> {
-    rusqlite::Connection::open(form.location.trim())
-        .and_then(|connection| connection.execute_batch("PRAGMA schema_version;"))
-        .map(|_| String::from("SQLite connection opened successfully."))
-        .map_err(|error| format!("SQLite connection failed: {error}"))
+#[derive(Debug, Clone)]
+struct ConnectionProbe {
+    connect_latency_ms: u128,
+    roundtrip_latency_ms: u128,
+    metadata_latency_ms: Option<u128>,
+    server_version: Option<String>,
+    encoding: Option<String>,
 }
 
-fn test_mysql(form: &ConnectionForm) -> Result<String, String> {
+fn test_sqlite(form: &ConnectionForm) -> Result<ConnectionProbe, String> {
+    let connect_start = Instant::now();
+    let connection = rusqlite::Connection::open(form.location.trim())
+        .map_err(|error| format!("SQLite connection failed: {error}"))?;
+    let connect_latency_ms = connect_start.elapsed().as_millis();
+
+    let roundtrip_start = Instant::now();
+    let value: i64 = connection
+        .query_row("SELECT 1", [], |row| row.get(0))
+        .map_err(|error| format!("SQLite ping query failed: {error}"))?;
+    if value != 1 {
+        return Err(String::from(
+            "SQLite ping query returned an unexpected value.",
+        ));
+    }
+    let roundtrip_latency_ms = roundtrip_start.elapsed().as_millis();
+
+    let metadata_start = Instant::now();
+    connection
+        .execute_batch("PRAGMA schema_version;")
+        .map_err(|error| format!("SQLite metadata query failed: {error}"))?;
+
+    Ok(ConnectionProbe {
+        connect_latency_ms,
+        roundtrip_latency_ms,
+        metadata_latency_ms: Some(metadata_start.elapsed().as_millis()),
+        server_version: Some(String::from("SQLite")),
+        encoding: Some(String::from("UTF-8")),
+    })
+}
+
+fn test_mysql(form: &ConnectionForm) -> Result<ConnectionProbe, String> {
     let opts = mysql::Opts::from_url(&mysql_url(form))
         .map_err(|error| format!("MySQL connection options failed: {error}"))?;
     let pool =
         mysql::Pool::new(opts).map_err(|error| format!("MySQL pool creation failed: {error}"))?;
+    let connect_start = Instant::now();
     let mut connection = pool
         .get_conn()
         .map_err(|error| mysql_connection_error_message(form, &error.to_string()))?;
+    let connect_latency_ms = connect_start.elapsed().as_millis();
+
+    let roundtrip_start = Instant::now();
     let value: Option<u8> = connection
         .query_first("select 1")
         .map_err(|error| format!("MySQL ping query failed: {error}"))?;
+    let roundtrip_latency_ms = roundtrip_start.elapsed().as_millis();
 
-    match value {
-        Some(1) => Ok(String::from("MySQL ping query returned 1.")),
-        _ => Err(String::from(
+    if value != Some(1) {
+        return Err(String::from(
             "MySQL ping query returned an unexpected value.",
-        )),
+        ));
     }
+
+    let metadata_start = Instant::now();
+    let metadata: Option<(String, String, String)> = connection
+        .query_first("select @@version, @@character_set_connection, @@collation_connection")
+        .map_err(|error| format!("MySQL metadata query failed: {error}"))?;
+
+    let (server_version, charset, collation) = metadata.unwrap_or_else(|| {
+        (
+            String::from("unknown"),
+            String::from("unknown"),
+            String::from("unknown"),
+        )
+    });
+
+    Ok(ConnectionProbe {
+        connect_latency_ms,
+        roundtrip_latency_ms,
+        metadata_latency_ms: Some(metadata_start.elapsed().as_millis()),
+        server_version: Some(server_version),
+        encoding: Some(format!("{charset}/{collation}")),
+    })
 }
 
 fn mysql_connection_error_message(form: &ConnectionForm, error: &str) -> String {
@@ -75,7 +174,7 @@ fn mysql_connection_error_message(form: &ConnectionForm, error: &str) -> String 
     format!("MySQL connection failed: {error}")
 }
 
-fn test_postgres(form: &ConnectionForm) -> Result<String, String> {
+fn test_postgres(form: &ConnectionForm) -> Result<ConnectionProbe, String> {
     let mut config = postgres::Config::new();
     config
         .host(form.location.trim())
@@ -85,33 +184,73 @@ fn test_postgres(form: &ConnectionForm) -> Result<String, String> {
         .dbname(database_name(form).as_str())
         .connect_timeout(timeout(form));
 
+    let connect_start = Instant::now();
     let mut client = config
         .connect(NoTls)
         .map_err(|error| format!("PostgreSQL connection failed: {error}"))?;
+    let connect_latency_ms = connect_start.elapsed().as_millis();
+
+    let roundtrip_start = Instant::now();
     let row = client
         .query_one("select 1::int", &[])
         .map_err(|error| format!("PostgreSQL ping query failed: {error}"))?;
     let value: i32 = row.get(0);
+    let roundtrip_latency_ms = roundtrip_start.elapsed().as_millis();
 
-    if value == 1 {
-        Ok(String::from("PostgreSQL ping query returned 1."))
-    } else {
-        Err(String::from(
+    if value != 1 {
+        return Err(String::from(
             "PostgreSQL ping query returned an unexpected value.",
-        ))
+        ));
     }
+
+    let metadata_start = Instant::now();
+    let row = client
+        .query_one(
+            "select version(), current_setting('server_encoding'), current_schema()",
+            &[],
+        )
+        .map_err(|error| format!("PostgreSQL metadata query failed: {error}"))?;
+    let server_version: String = row.get(0);
+    let server_encoding: String = row.get(1);
+    let current_schema: String = row.get(2);
+
+    Ok(ConnectionProbe {
+        connect_latency_ms,
+        roundtrip_latency_ms,
+        metadata_latency_ms: Some(metadata_start.elapsed().as_millis()),
+        server_version: Some(server_version),
+        encoding: Some(format!("{server_encoding}/{current_schema}")),
+    })
 }
 
-fn test_mongodb(form: &ConnectionForm) -> Result<String, String> {
+fn test_mongodb(form: &ConnectionForm) -> Result<ConnectionProbe, String> {
+    let connect_start = Instant::now();
     let options = mongodb::options::ClientOptions::parse(mongodb_url(form))
         .map_err(|error| format!("MongoDB connection options failed: {error}"))?;
     let client = MongoClient::with_options(options)
         .map_err(|error| format!("MongoDB client creation failed: {error}"))?;
+    let connect_latency_ms = connect_start.elapsed().as_millis();
+
+    let roundtrip_start = Instant::now();
     client
         .database(database_name(form).as_str())
         .run_command(doc! { "ping": 1 }, None)
-        .map(|_| String::from("MongoDB ping command succeeded."))
-        .map_err(|error| format!("MongoDB ping failed: {error}"))
+        .map_err(|error| format!("MongoDB ping failed: {error}"))?;
+    let roundtrip_latency_ms = roundtrip_start.elapsed().as_millis();
+
+    let metadata_start = Instant::now();
+    let build_info = client
+        .database("admin")
+        .run_command(doc! { "buildInfo": 1 }, None)
+        .map_err(|error| format!("MongoDB metadata query failed: {error}"))?;
+
+    Ok(ConnectionProbe {
+        connect_latency_ms,
+        roundtrip_latency_ms,
+        metadata_latency_ms: Some(metadata_start.elapsed().as_millis()),
+        server_version: build_info.get_str("version").ok().map(str::to_owned),
+        encoding: Some(String::from("BSON")),
+    })
 }
 
 fn mysql_url(form: &ConnectionForm) -> String {

@@ -21,7 +21,6 @@ pub enum TableAction {
     DescribeTable,
     RenameTable,
     AlterTable,
-    TruncateTable,
     DropTable,
 }
 
@@ -59,44 +58,23 @@ impl Section {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum QuickAction {
     NewConnection,
-    NewQuery,
-    ImportSql,
-    ExportSql,
     RefreshData,
 }
 
 impl QuickAction {
-    pub const PRIMARY: [QuickAction; 5] = [
-        QuickAction::NewConnection,
-        QuickAction::NewQuery,
-        QuickAction::ImportSql,
-        QuickAction::ExportSql,
-        QuickAction::RefreshData,
-    ];
+    pub const PRIMARY: [QuickAction; 2] = [QuickAction::NewConnection, QuickAction::RefreshData];
 
     pub fn label(self) -> &'static str {
         match self {
             QuickAction::NewConnection => "New Connection",
-            QuickAction::NewQuery => "New Query",
-            QuickAction::ImportSql => "Import SQL",
-            QuickAction::ExportSql => "Export SQL",
             QuickAction::RefreshData => "Refresh",
         }
     }
 
     pub(super) fn status_message(self) -> &'static str {
         match self {
-            QuickAction::NewConnection => {
-                "Connection manager requested. Engine-specific parameters are next."
-            }
-            QuickAction::NewQuery => {
-                "Query editor requested. SQL completion and formatting are next."
-            }
-            QuickAction::ImportSql => {
-                "SQL import requested. File selection and execution preview are next."
-            }
-            QuickAction::ExportSql => "SQL export requested. Schema/data export options are next.",
-            QuickAction::RefreshData => "Refresh requested. No active result set is connected yet.",
+            QuickAction::NewConnection => "New connection draft opened.",
+            QuickAction::RefreshData => "Refresh requested.",
         }
     }
 }

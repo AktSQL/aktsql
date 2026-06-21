@@ -1,43 +1,43 @@
-## 1. Query Model
+## 1. 查询模型
 
-- [x] 1.1 Add a focused query module with SQL draft state, result model, validation, and row cap.
-- [x] 1.2 Execute SQLite SQL through `rusqlite` and report rows, affected count, elapsed time, and errors.
+- [x] 1.1 添加聚焦的 query 模块，包含 SQL 草稿状态、结果模型、校验和行数上限。
+- [x] 1.2 通过 `rusqlite` 执行 SQLite SQL，并报告行、影响数量、耗时和错误。
 
-## 2. Application Wiring
+## 2. 应用接线
 
-- [x] 2.1 Add messages for SQL draft editing and query execution.
-- [x] 2.2 Wire Query Explorer navigation, top-bar Execute, global row count, and latency to query state.
+- [x] 2.1 添加 SQL 草稿编辑和查询执行消息。
+- [x] 2.2 将 Query Explorer 导航、顶栏 Execute、全局行数和延迟接入查询状态。
 
-## 3. Desktop UI
+## 3. 桌面 UI
 
-- [x] 3.1 Replace the Query Explorer placeholder with a query console surface.
-- [x] 3.2 Add active connection context, SQL input, execution messages, and result grid preview.
+- [x] 3.1 用查询控制台界面替换 Query Explorer 占位。
+- [x] 3.2 添加活动连接上下文、SQL 输入、执行消息和结果表格预览。
 
-## 4. Verification
+## 4. 验证
 
-- [x] 4.1 Run Rust formatting and compiler checks.
-- [x] 4.2 Confirm OpenSpec artifacts and task list are complete.
+- [x] 4.1 运行 Rust 格式化和编译检查。
+- [x] 4.2 确认 OpenSpec artifacts 和任务清单已完成。
 
-## 5. Schema Browser
+## 5. 结构浏览器
 
-- [x] 5.1 Load SQLite schema objects from `sqlite_master`.
-- [x] 5.2 Wire Query Explorer refresh to schema loading.
-- [x] 5.3 Populate SQL editor from selected schema objects.
+- [x] 5.1 从 `sqlite_master` 加载 SQLite schema 对象。
+- [x] 5.2 将 Query Explorer 刷新接入 schema 加载。
+- [x] 5.3 根据选中的 schema 对象填充 SQL 编辑器。
 
-## 6. Responsiveness
+## 6. 响应性
 
-- [x] 6.1 Move query execution off the synchronous update path.
-- [x] 6.2 Move schema refresh off the synchronous update path.
-- [x] 6.3 Guard running query/schema operations from duplicate enqueue.
-- [x] 6.4 Avoid rebuilding SQL text on non-edit editor actions.
+- [x] 6.1 将查询执行移出同步 update 路径。
+- [x] 6.2 将 schema 刷新移出同步 update 路径。
+- [x] 6.3 防止正在运行的 query/schema 操作被重复入队。
+- [x] 6.4 避免在非编辑类 editor 操作中重建 SQL 文本。
 
-## 7. Prototype Calibration
+## 7. 原型校准
 
-- [x] 7.1 Merge Query Explorer schema browsing into the primary 240px sidebar to match the console prototype.
-- [x] 7.2 Tighten Query Console content margins so editor and results use the prototype-style workbench canvas.
-- [x] 7.3 Update the status bar to expose version, logs, rows, latency, encoding, driver, and cursor context.
-- [x] 7.4 Convert top refresh/download/filter controls to compact icon-like buttons.
-- [x] 7.5 Add command/ctrl-enter query execution to match the settings prototype keybinding.
-- [x] 7.6 Add prototype-style result row striping and status chips.
-- [x] 7.7 Add nonblocking Commit feedback and F9 shortcut placeholder to match prototype controls.
-- [x] 7.8 Wire result toolbar actions with search feedback, CSV export, and a result-grid focus mode for smoother large-result inspection.
+- [x] 7.1 将 Query Explorer schema 浏览合并到主 240px 侧栏，以匹配控制台原型。
+- [x] 7.2 收紧 Query Console 内容边距，让编辑器和结果使用原型风格工作台画布。
+- [x] 7.3 更新状态栏，暴露版本、日志、行数、延迟、编码、驱动和光标上下文。
+- [x] 7.4 将顶部刷新/下载/过滤控件转换为紧凑图标式按钮。
+- [x] 7.5 添加 command/ctrl-enter 查询执行，以匹配设置原型快捷键。
+- [x] 7.6 添加原型风格结果行斑马纹和状态 chip。
+- [x] 7.7 添加非阻塞 Commit 反馈和 F9 快捷键占位，以匹配原型控件。
+- [x] 7.8 接线结果工具栏操作，包括搜索反馈、CSV 导出和结果表格聚焦模式，以改善大结果查看体验。

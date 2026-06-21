@@ -166,7 +166,7 @@ pub(super) fn add_column_statement(
             definition
         )),
         DatabaseDriver::MongoDb => Err(String::from(
-            "MongoDB has no ADD COLUMN DDL. Add fields with updateMany or schema validation.",
+            "MongoDB has no relational add-column operation. Add fields with updateMany or schema validation.",
         )),
     }
 }
@@ -261,13 +261,13 @@ pub(super) fn add_constraint_statement(
 
     if matches!(form.driver, DatabaseDriver::Sqlite) {
         return Err(String::from(
-            "SQLite cannot add table constraints with ALTER TABLE. Rebuild the table instead.",
+            "SQLite cannot add table constraints in-place. Rebuild the table instead.",
         ));
     }
 
     if matches!(form.driver, DatabaseDriver::MongoDb) {
         return Err(String::from(
-            "MongoDB constraints must be modeled with collection validators, not ALTER TABLE.",
+            "MongoDB constraints must be modeled with collection validators, not relational table changes.",
         ));
     }
 

@@ -1,11 +1,11 @@
-## 1. Settings Surface
+## 1. 设置界面
 
-- [x] 1.1 Route the Settings section to an Appearance Settings workspace.
-- [x] 1.2 Add theme, density, typography, and keybinding panels aligned to the prototype.
-- [x] 1.3 Wire the first Apply Configuration action to the existing theme toggle.
-- [x] 1.4 Adjust Settings sidebar header and actions to match the appearance settings prototype.
-- [x] 1.5 Pin Settings action controls to a bottom action bar like the prototype.
+- [x] 1.1 将设置导航路由到外观设置工作区。
+- [x] 1.2 添加与原型对齐的主题、密度、字体和快捷键面板。
+- [x] 1.3 将第一版“应用配置”操作接入现有主题切换。
+- [x] 1.4 调整设置侧栏标题和操作，使其匹配外观设置原型。
+- [x] 1.5 像原型一样将设置操作控件固定到底部操作栏。
 
-## 2. Verification
+## 2. 验证
 
-- [x] 2.1 Run formatting, compiler, and diff whitespace checks.
+- [x] 2.1 运行格式化、编译和 diff whitespace 检查。

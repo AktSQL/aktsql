@@ -1,36 +1,36 @@
-## Context
+## 上下文
 
-The prototype console shows a dense SQL editor, active connection metadata, result grid, execution status, and footer metrics. The current app has the surrounding shell and connection profiles, but no query execution state.
+原型控制台展示了高密度 SQL 编辑器、活动连接元数据、结果表格、执行状态和页脚指标。当前应用已有外围 shell 和连接配置，但尚无查询执行状态。
 
-## Goals / Non-Goals
+## 目标 / 非目标
 
-**Goals:**
+**目标：**
 
-- Keep query state and execution out of the iced UI layer.
-- Execute SQLite statements using the active connection draft/profile.
-- Show columns, rows, affected rows, elapsed time, and error messages.
-- Update global rows/latency status after execution.
-- Keep the Query Explorer surface visually aligned with the prototype.
-- Browse SQLite schema objects from the Query Explorer sidebar.
-- Keep query execution and schema refresh off the immediate UI update path.
+- 将查询状态和执行逻辑保持在 iced UI 层之外。
+- 使用活动连接草稿/配置执行 SQLite 语句。
+- 显示列、行、影响行数、耗时和错误消息。
+- 执行后更新全局行数/延迟状态。
+- 让 Query Explorer 界面在视觉上与原型保持一致。
+- 从 Query Explorer 侧栏浏览 SQLite schema 对象。
+- 让查询执行和 schema 刷新脱离即时 UI update 路径。
 
-**Non-Goals:**
+**非目标：**
 
-- No SQL syntax highlighting, completion, formatting, multi-tabs, transactions, or execution plans.
-- No network database execution for MySQL, PostgreSQL, SQL Server, Oracle, etc.
-- No editable data grid.
+- 不实现 SQL 语法高亮、补全、格式化、多标签页、事务或执行计划。
+- 不实现 MySQL、PostgreSQL、SQL Server、Oracle 等网络数据库执行。
+- 不实现可编辑数据表格。
 
-## Decisions
+## 决策
 
-- **Use a focused `query` module.** It owns SQL draft state, result state, row cap, validation, and SQLite execution.
-- **Execute against the active connection form.** Loading a profile already copies it into the active form, so Query Explorer can use the same connection context shown in the sidebar.
-- **Stringify values for the first grid.** Typed cells and binary inspectors can be introduced with the future data-grid slice.
-- **Cap result rows.** The first implementation limits returned rows to keep the fixed-size UI responsive.
-- **Refresh schema explicitly.** The first schema browser is driven by the top/sidebar refresh actions to avoid opening database files on every draft edit.
-- **Run database work through iced tasks.** Query execution and schema refresh start a background task and apply results only when the task completes, so UI events remain responsive.
+- **使用聚焦的 `query` 模块。** 它负责 SQL 草稿状态、结果状态、行数上限、校验和 SQLite 执行。
+- **针对活动连接表单执行。** 加载配置时已将配置复制到活动表单，因此 Query Explorer 可以使用侧栏显示的同一连接上下文。
+- **首个表格先将值字符串化。** 类型化单元格和二进制 inspector 可在后续 data-grid 切片中引入。
+- **限制结果行数。** 第一版限制返回行数，以保持固定尺寸 UI 响应性。
+- **显式刷新 schema。** 第一个 schema browser 由顶部/侧栏刷新动作驱动，避免每次草稿编辑都打开数据库文件。
+- **通过 iced task 运行数据库工作。** 查询执行和 schema 刷新启动后台 task，并只在 task 完成后应用结果，让 UI 事件保持响应。
 
-## Risks / Trade-offs
+## 风险 / 取舍
 
-- **Plain SQL editor is not a full IDE editor** -> acceptable for the first working slice; syntax highlighting and completion can layer onto the current text editor later.
-- **SQLite-only execution is narrow** -> status messages make this explicit and prevent false expectations for the broad driver list.
-- **Concurrent clicks can overload slow database files** -> execution and schema refresh use running-state guards so repeated clicks do not enqueue duplicate jobs.
+- **普通 SQL 编辑器不是完整 IDE 编辑器** -> 对第一个可工作切片可以接受；语法高亮和补全后续可叠加到当前文本编辑器。
+- **只支持 SQLite 执行范围较窄** -> 状态消息会明确说明，避免宽驱动列表带来错误预期。
+- **并发点击可能压垮慢速数据库文件** -> 执行和 schema 刷新使用 running-state guard，避免重复点击入队重复任务。

@@ -200,7 +200,11 @@ fn index_column_toggle_chip(
         text(label)
             .size(10)
             .wrapping(Wrapping::None)
-            .style(theme::on_surface_text),
+            .style(if selected {
+                theme::on_primary_text
+            } else {
+                theme::on_surface_text
+            }),
     )
     .height(24)
     .padding([0, 9])
@@ -218,7 +222,11 @@ fn row_select_button(label: String, selected: bool, message: Message) -> Element
         text(label)
             .size(10)
             .wrapping(Wrapping::None)
-            .style(theme::on_surface_text),
+            .style(if selected {
+                theme::on_primary_text
+            } else {
+                theme::on_surface_text
+            }),
     )
     .width(34)
     .height(24)
@@ -233,23 +241,46 @@ fn row_select_button(label: String, selected: bool, message: Message) -> Element
 }
 
 fn icon_command_button(label: &'static str, message: Message) -> Element<'static, Message> {
-    button(text(label).size(12).wrapping(Wrapping::None))
-        .width(28)
-        .height(24)
-        .padding(0)
-        .style(theme::secondary_button)
-        .on_press(message)
-        .into()
+    icon_command_button_enabled(label, Some(message))
 }
 
-fn icon_danger_button(label: &'static str, message: Message) -> Element<'static, Message> {
-    button(text(label).size(12).wrapping(Wrapping::None))
+fn icon_command_button_enabled(
+    label: &'static str,
+    message: Option<Message>,
+) -> Element<'static, Message> {
+    let mut action = button(
+        text(label)
+            .size(12)
+            .wrapping(Wrapping::None)
+            .style(theme::on_primary_text),
+    )
+    .width(28)
+    .height(24)
+    .padding(0)
+    .style(theme::secondary_button);
+
+    if let Some(message) = message {
+        action = action.on_press(message);
+    }
+
+    action.into()
+}
+
+fn icon_danger_button_enabled(
+    label: &'static str,
+    message: Option<Message>,
+) -> Element<'static, Message> {
+    let mut action = button(text(label).size(12).wrapping(Wrapping::None))
         .width(28)
         .height(24)
         .padding(0)
-        .style(theme::danger_button)
-        .on_press(message)
-        .into()
+        .style(theme::danger_button);
+
+    if let Some(message) = message {
+        action = action.on_press(message);
+    }
+
+    action.into()
 }
 
 fn small_danger_button(label: &'static str, message: Message) -> Element<'static, Message> {
@@ -429,41 +460,6 @@ pub(super) fn rename_table_dialog<'a>(
     .height(Length::Fill)
     .align_x(Horizontal::Center)
     .align_y(Vertical::Center)
-    .into()
-}
-
-fn sql_preview_block<'a>(
-    language: Language,
-    title: &'static str,
-    sql: String,
-    copy_message: Message,
-    height: u16,
-) -> Element<'a, Message> {
-    let texts = i18n::texts(language);
-
-    container(
-        column![
-            row![
-                detail_section_label(title),
-                Space::with_width(Length::Fill),
-                small_command_button(texts.copy_sql, copy_message),
-            ]
-            .align_y(Alignment::Center),
-            scrollable(
-                text(sql)
-                    .size(11)
-                    .wrapping(Wrapping::WordOrGlyph)
-                    .style(theme::on_surface_text)
-            )
-            .height(height)
-            .style(theme::scrollable),
-        ]
-        .spacing(6),
-    )
-    .style(theme::panel_low)
-    .padding(10)
-    .height(height as f32 + 46.0)
-    .width(Length::Fill)
     .into()
 }
 

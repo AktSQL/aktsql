@@ -1,68 +1,68 @@
 ## ADDED Requirements
 
-### Requirement: Connection Profile Model
+### Requirement: 连接配置模型
 
-The system SHALL model database connection profiles with typed driver selection and explicit parameter fields instead of opaque connection strings.
+系统 SHALL 使用类型化驱动选择和显式参数字段建模数据库连接配置，而不是使用不透明连接字符串。
 
-#### Scenario: Supported initial drivers are available
+#### Scenario: 初始支持驱动可用
 
-- **WHEN** the connection manager is shown
-- **THEN** the user can choose MySQL, MariaDB, TiDB, OceanBase, PostgreSQL, CockroachDB, Greenplum, SQLite, DuckDB, SQL Server, SQL Server 2000, Oracle, Db2, Informix, Sybase ASE, Firebird, ClickHouse, Redis, MongoDB, Cassandra, Elasticsearch, Snowflake, BigQuery, Redshift, Trino, Hive, or Databricks as the connection driver
+- **WHEN** 显示连接管理器
+- **THEN** 用户可以选择 MySQL、MariaDB、TiDB、OceanBase、PostgreSQL、CockroachDB、Greenplum、SQLite、DuckDB、SQL Server、SQL Server 2000、Oracle、Db2、Informix、Sybase ASE、Firebird、ClickHouse、Redis、MongoDB、Cassandra、Elasticsearch、Snowflake、BigQuery、Redshift、Trino、Hive 或 Databricks 作为连接驱动
 
-#### Scenario: Driver defaults are applied
+#### Scenario: 应用驱动默认值
 
-- **WHEN** the user switches the connection driver
-- **THEN** the form updates port, host/path, charset, and collation defaults for that driver
+- **WHEN** 用户切换连接驱动
+- **THEN** 表单更新该驱动的端口、主机/路径、字符集和排序规则默认值
 
-### Requirement: Connection Parameter Completeness
+### Requirement: 连接参数完整性
 
-The system SHALL expose the baseline connection parameters required for professional database clients: profile name, host or file path, port, username, password, database name, charset, collation, SSL toggle, SSH tunnel toggle, timeout, and notes.
+系统 SHALL 暴露专业数据库客户端所需的基线连接参数：配置名称、主机或文件路径、端口、用户名、密码、数据库名、字符集、排序规则、SSL 开关、SSH 隧道开关、超时和备注。
 
-#### Scenario: MySQL default charset and collation
+#### Scenario: MySQL 默认字符集和排序规则
 
-- **WHEN** a MySQL connection profile is created
-- **THEN** the default charset is `utf8mb4`
-- **THEN** the default collation is `utf8mb4_bin`
+- **WHEN** 创建 MySQL 连接配置
+- **THEN** 默认字符集为 `utf8mb4`
+- **THEN** 默认排序规则为 `utf8mb4_bin`
 
-#### Scenario: SQLite uses a file path
+#### Scenario: SQLite 使用文件路径
 
-- **WHEN** SQLite is selected as the driver
-- **THEN** the form treats the location field as a database file path instead of a network host
+- **WHEN** 选择 SQLite 作为驱动
+- **THEN** 表单将位置字段视为数据库文件路径，而不是网络主机
 
-### Requirement: Local Connection Validation
+### Requirement: 本地连接校验
 
-The system SHALL validate connection form input before reporting a profile as locally valid or saving it.
+系统 SHALL 在报告配置本地有效或保存前校验连接表单输入。
 
-#### Scenario: Missing required values are rejected
+#### Scenario: 拒绝缺失必填值
 
-- **WHEN** the user tests or saves a connection profile with a missing profile name or missing host/path
-- **THEN** the system reports validation errors and does not mark the profile as valid
+- **WHEN** 用户测试或保存缺少配置名称或主机/路径的连接配置
+- **THEN** 系统报告校验错误，并且不将配置标记为有效
 
-#### Scenario: Invalid port is rejected
+#### Scenario: 拒绝无效端口
 
-- **WHEN** the user enters a non-numeric or out-of-range port for a network database driver
-- **THEN** the system reports a port validation error
+- **WHEN** 用户为网络数据库驱动输入非数字或超出范围的端口
+- **THEN** 系统报告端口校验错误
 
-### Requirement: Connection Manager UI
+### Requirement: 连接管理器 UI
 
-The system SHALL provide an iced desktop connection manager view in the Databases workspace.
+系统 SHALL 在 Databases 工作区提供 iced 桌面连接管理器视图。
 
-#### Scenario: User opens Databases workspace
+#### Scenario: 用户打开 Databases 工作区
 
-- **WHEN** the Databases section is selected
-- **THEN** the workspace shows a connection list and editable connection form
+- **WHEN** 选择 Databases section
+- **THEN** 工作区显示连接列表和可编辑连接表单
 
-#### Scenario: User tests a local profile
+#### Scenario: 用户测试本地配置
 
-- **WHEN** the user clicks Test
-- **THEN** the app validates the current form and reports whether the profile is locally valid
+- **WHEN** 用户点击 Test
+- **THEN** 应用校验当前表单，并报告配置是否本地有效
 
-#### Scenario: User tests a SQLite profile
+#### Scenario: 用户测试 SQLite 配置
 
-- **WHEN** the user clicks Test for a valid SQLite profile
-- **THEN** the app opens the SQLite database file and reports the real connection result
+- **WHEN** 用户对有效 SQLite 配置点击 Test
+- **THEN** 应用打开 SQLite 数据库文件，并报告真实连接结果
 
-#### Scenario: User saves a profile
+#### Scenario: 用户保存配置
 
-- **WHEN** the user clicks Save
-- **THEN** the app validates the current form and stores the profile in memory if validation succeeds
+- **WHEN** 用户点击 Save
+- **THEN** 应用校验当前表单，并在校验成功时将配置保存到内存

@@ -1,28 +1,28 @@
-## Why
+## 为什么
 
-The desktop shell must remain stable before larger Navicat-like workflows are added. Recent UI feedback shows that fixed-size window behavior, connection form bounds, persisted configuration, and language-ready copy need a tighter foundation now.
+在加入更大的 Navicat 类工作流前，桌面主壳必须保持稳定。近期 UI 反馈表明，固定尺寸窗口行为、连接表单边界、持久化配置和语言就绪文案现在需要更扎实的基础。
 
-## What Changes
+## 变更内容
 
-- Harden the fixed-size iced window so standard close/minimize behavior remains available while the content area stays at the prototype-aligned size.
-- Add explicit layout constraints for connection manager forms, lists, and status text so controls do not overflow the fixed window.
-- Move connection profile persistence toward an application config location instead of relying only on the process working directory.
-- Expand the i18n foundation so user-facing shell and connection manager copy can be centralized before Chinese/English switching is implemented.
-- No breaking changes.
+- 加固固定尺寸 iced 窗口，在内容区保持原型对齐尺寸的同时，保留标准关闭/最小化行为。
+- 为连接管理器表单、列表和状态文本添加明确布局约束，避免控件溢出固定窗口。
+- 将连接配置持久化迁移到应用配置位置，而不是只依赖进程工作目录。
+- 扩展 i18n 基础，在实现中文/英文切换前，先集中管理面向用户的 shell 与连接管理器文案。
+- 无破坏性变更。
 
-## Capabilities
+## 能力
 
-### New Capabilities
+### 新增能力
 
-- `shell-stability-and-i18n`: Desktop shell stability, fixed-window layout constraints, configuration persistence path behavior, and language-ready UI text boundaries.
+- `shell-stability-and-i18n`：桌面主壳稳定性、固定窗口布局约束、配置持久化路径行为，以及语言就绪 UI 文案边界。
 
-### Modified Capabilities
+### 修改能力
 
-- None.
+- 无。
 
-## Impact
+## 影响
 
-- Affected code: `crates/aktsql_app/src/main.rs`, `crates/aktsql_app/src/ui.rs`, `crates/aktsql_app/src/i18n.rs`, `crates/aktsql_app/src/persistence.rs`, and application reducer status messages.
-- Affected UI: fixed desktop window, native window controls, connection manager layout, status bar text, and theme/status labels.
-- Affected data: connection profiles continue to omit passwords, but config save/load should prefer a stable per-user Akt location when available.
-- Dependencies: may add a small cross-platform config directory helper if the standard library alone would produce fragile paths.
+- 受影响代码：`crates/aktsql_app/src/main.rs`、`crates/aktsql_app/src/ui.rs`、`crates/aktsql_app/src/i18n.rs`、`crates/aktsql_app/src/persistence.rs`，以及应用 reducer 状态消息。
+- 受影响 UI：固定桌面窗口、原生窗口控件、连接管理器布局、状态栏文本和主题/状态标签。
+- 受影响数据：连接配置继续不保存密码，但配置保存/加载应在可用时优先使用稳定的用户级 Akt 位置。
+- 依赖：如果单靠标准库会产生脆弱路径，可能添加一个小型跨平台配置目录 helper。

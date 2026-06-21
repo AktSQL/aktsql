@@ -1,22 +1,22 @@
-# Tasks
+# 任务
 
-- [x] 1.1 Document the object-tree workbench navigation model.
-- [x] 1.2 Update product requirements so create database no longer uses SQL preview as the primary path.
-- [x] 1.3 Replace the flat left sidebar with an object tree and bottom tool section.
-- [x] 1.4 Add database/table tree node expansion and right-click action menus.
-- [x] 1.5 Keep the full database tree visible while expanding the selected database's tables.
-- [x] 1.6 Make database left-click toggle expand/collapse while explicit connection databases open as table lists.
-- [x] 2.1 Add a create database form with required and driver-specific optional parameters.
-- [x] 2.2 Execute create database directly for supported drivers without changing the query editor.
-- [x] 2.3 Keep unsupported native-driver targets explicit instead of generating preview SQL.
-- [x] 2.4 Add database-node actions for create table, read-only details, rename dialog, and charset dialog.
-- [x] 2.5 Add driver-mapped database and table rename workflows.
-- [x] 2.6 Load live database details into the right workbench with driver-specific grouped metadata.
-- [x] 2.7 Execute table row browsing directly with 100-row pagination.
-- [x] 2.8 Load read-only table structure details without routing through SQL preview.
-- [x] 2.9 Add direct alter-table form actions for rename column, add column, add index, and supported column movement.
-- [x] 3.1 Add basic direct create table dialog without SQL preview.
-- [x] 3.5 Expand create table designer with multi-column grid, indexes, constraints, and engine options.
-- [x] 3.2 Add confirmation dialogs for drop table and drop database.
-- [ ] 3.3 Add confirmation dialogs for Truncate Table.
-- [ ] 3.4 Add mutation history/log details for executed schema changes.
+- [x] 1.1 记录对象树工作台导航模型。
+- [x] 1.2 更新产品需求，使创建数据库以校验表单和执行反馈作为主路径。
+- [x] 1.3 将平铺左侧栏替换为对象树和底部工具区。
+- [x] 1.4 添加数据库/数据表树节点展开和右键操作菜单。
+- [x] 1.5 展开选中数据库的数据表时，保持完整数据库树可见。
+- [x] 1.6 让数据库左键切换展开/折叠；显式连接数据库则打开为数据表列表。
+- [x] 2.1 添加创建数据库表单，包含必填参数和驱动专属可选参数。
+- [x] 2.2 对支持的驱动直接执行创建数据库，不改变查询编辑器。
+- [x] 2.3 对不支持原生驱动的目标保持明确提示，而不是生成可执行假象。
+- [x] 2.4 添加数据库节点操作：创建表、只读详情、重命名弹窗和字符集弹窗。
+- [x] 2.5 添加按驱动映射的数据库和数据表重命名工作流。
+- [x] 2.6 将实时数据库详情加载到右侧工作台，并按驱动分组元数据。
+- [x] 2.7 直接执行表行浏览，分页大小为 100 行。
+- [x] 2.8 加载只读表结构详情，不通过查询编辑器中转。
+- [x] 2.9 添加直接 alter-table 表单操作：重命名字段、新增字段、新增索引和支持的字段移动。
+- [x] 3.1 添加基础的直接创建表弹窗，使用结构化表单和执行反馈。
+- [x] 3.5 扩展创建表设计器，加入多字段网格、索引、约束和引擎选项。
+- [x] 3.2 添加删除表和删除数据库确认弹窗。
+- [ ] 3.3 添加 Truncate Table 确认弹窗。
+- [ ] 3.4 为已执行 schema 变更添加变更历史/日志详情。

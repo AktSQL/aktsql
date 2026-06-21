@@ -74,16 +74,14 @@ pub struct SchemaObject {
     pub name: String,
     pub kind: SchemaObjectKind,
     depth: u8,
-    preview: String,
 }
 
 impl SchemaObject {
-    pub(super) fn new(name: String, kind: SchemaObjectKind, preview: String) -> Self {
+    pub(super) fn new(name: String, kind: SchemaObjectKind, _preview: String) -> Self {
         Self {
             name,
             kind,
             depth: kind.default_depth(),
-            preview,
         }
     }
 
@@ -95,9 +93,6 @@ impl SchemaObject {
         self.depth
     }
 
-    pub fn sql_preview(&self) -> String {
-        self.preview.clone()
-    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -111,6 +106,17 @@ pub enum SchemaObjectKind {
 }
 
 impl SchemaObjectKind {
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::Database => "database",
+            Self::Table => "table",
+            Self::View => "view",
+            Self::Index => "index",
+            Self::Collection => "collection",
+            Self::Column => "column",
+        }
+    }
+
     fn icon(self) -> &'static str {
         match self {
             Self::Database => "DB",

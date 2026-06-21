@@ -8,8 +8,7 @@ use crate::query::{
 };
 use crate::system_metrics;
 use crate::theme::ThemeMode;
-use iced::widget::text_editor;
-use iced::{clipboard, keyboard, time, window, Subscription, Task};
+use iced::{keyboard, time, window, Subscription, Task};
 use std::collections::{BTreeSet, HashSet};
 use std::time::Duration;
 
@@ -30,7 +29,7 @@ pub use model::{
     CreateTableColumnField, CreateTableConstraintDraft, CreateTableConstraintField,
     CreateTableDraft, CreateTableField, CreateTableIndexDraft, CreateTableIndexField,
     CreateTableTab, PendingSchemaDeletion, RenameDatabaseDraft, RenameTableDraft, ResultSortKey,
-    SchemaDeletionKind, SortDirection, TableRowsPage,
+    SchemaDeletionKind, SortDirection, TableRowsPage, UiFontPreference,
 };
 pub use navigation::{
     DatabaseAction, DatabaseEditField, QuickAction, Section, TableAction, TableEditField,
@@ -45,13 +44,11 @@ pub struct Akt {
     selected: Section,
     theme: ThemeMode,
     language: Language,
-    language_menu_open: bool,
+    ui_font_preference: UiFontPreference,
     connection_manager: ConnectionManager,
     query_workspace: QueryWorkspace,
-    query_editor: text_editor::Content,
     result_row_count: usize,
     result_latency_ms: Option<u128>,
-    query_result_order_by: Vec<ResultSortKey>,
     query_running: bool,
     schema_loading: bool,
     schema_mutation_running: bool,
@@ -88,6 +85,18 @@ pub struct Akt {
 }
 
 impl Akt {
+    fn persist_preferences(&mut self) {
+        let preferences = persistence::AppPreferences {
+            language: self.language.config_value().to_owned(),
+            theme: self.theme.config_value().to_owned(),
+            ui_font: self.ui_font_preference.config_value().to_owned(),
+        };
+
+        if let Err(error) = persistence::save_preferences(&preferences) {
+            self.status_message = error;
+        }
+    }
+
     pub fn subscription(&self) -> Subscription<Message> {
         Subscription::batch([
             keyboard::on_key_press(handle_key_press),
@@ -98,8 +107,12 @@ impl Akt {
     pub fn update(&mut self, message: Message) -> Task<Message> {
         match message {
             Message::SelectSection(section) => {
+                let section = if section == Section::QueryExplorer {
+                    Section::Databases
+                } else {
+                    section
+                };
                 self.selected = section;
-                self.language_menu_open = false;
                 if section == Section::Databases
                     && self.connection_manager.selected_profile_id().is_none()
                 {
@@ -107,7 +120,7 @@ impl Akt {
                 }
                 self.status_message = format!("{} workspace selected.", section.label());
 
-                if matches!(section, Section::QueryExplorer | Section::Tables)
+                if matches!(section, Section::Tables)
                     && self.query_workspace.schema_objects().is_empty()
                     && self.connection_manager.selected_profile_id().is_some()
                 {
@@ -116,30 +129,32 @@ impl Akt {
             }
             Message::ToggleTheme => {
                 self.theme = self.theme.toggle();
-                self.language_menu_open = false;
+                self.persist_preferences();
                 self.status_message = format!("Theme switched to {}.", self.theme.label());
-            }
-            Message::ToggleLanguageMenu => {
-                self.language_menu_open = !self.language_menu_open;
             }
             Message::LanguageSelected(language) => {
                 self.language = language;
-                self.language_menu_open = false;
+                self.persist_preferences();
                 self.status_message = format!("Language switched to {}.", self.language.label());
+            }
+            Message::FontPreferenceSelected(font_preference) => {
+                self.ui_font_preference = font_preference;
+                self.persist_preferences();
+                self.status_message = format!(
+                    "UI font set to {}. Restart Akt to apply it as the window default.",
+                    self.ui_font_preference.ui_font_name()
+                );
             }
             Message::RunQuickAction(action) => {
                 if action == QuickAction::NewConnection {
                     self.selected = Section::Databases;
                     self.database_workspace_active = false;
                     self.connection_manager.new_profile();
-                } else if action == QuickAction::NewQuery {
-                    if self.selected == Section::QueryExplorer {
-                        return self.execute_query();
-                    }
-
-                    self.selected = Section::QueryExplorer;
                 } else if action == QuickAction::RefreshData
                     && self.selected == Section::QueryExplorer
+                {
+                    return self.refresh_query_schema();
+                } else if action == QuickAction::RefreshData && self.selected == Section::Databases
                 {
                     return self.refresh_query_schema();
                 }
@@ -155,11 +170,6 @@ impl Akt {
                 if field == ConnectionField::Database {
                     self.database_expanded_from_tree = false;
                 }
-            }
-            Message::BrowseDatabaseFile => {
-                self.language_menu_open = false;
-                self.status_message =
-                    String::from("Database file picker requested. Native dialog wiring is next.");
             }
             Message::ConnectionSslToggled(enabled) => {
                 self.connection_manager.set_ssl_enabled(enabled);
@@ -242,7 +252,11 @@ impl Akt {
 
                 self.connection_testing = false;
                 self.status_message = match outcome {
-                    Ok(_) => String::from(i18n::texts(self.language).test_connection_succeeded),
+                    Ok(report) => format!(
+                        "{} · {}",
+                        i18n::texts(self.language).test_connection_succeeded,
+                        report.status_summary()
+                    ),
                     Err(_) => String::from(i18n::texts(self.language).test_connection_failed),
                 };
             }
@@ -264,10 +278,7 @@ impl Akt {
                         self.database_workspace_active = true;
                         self.database_expanded_from_tree = false;
                         self.result_focus = false;
-                        self.status_message = format!(
-                            "Connected to {} at {} in {} ms.",
-                            report.driver, report.target, report.elapsed_ms
-                        );
+                        self.status_message = format!("Connected · {}", report.status_summary());
                         return self.refresh_query_schema();
                     }
                     Err(errors) => {
@@ -385,64 +396,6 @@ impl Akt {
                     }
                 }
             }
-            Message::QueryEditorAction(action) => {
-                let is_edit = action.is_edit();
-                self.query_editor.perform(action);
-
-                if is_edit {
-                    self.query_workspace.set_sql(self.query_editor.text());
-                    self.query_result_order_by.clear();
-                    self.table_rows_page = None;
-                }
-            }
-            Message::NewQueryDraft => {
-                self.selected = Section::QueryExplorer;
-                let sql = self
-                    .query_workspace
-                    .example_sql(self.connection_manager.form());
-                self.set_query_sql(&sql);
-                self.result_focus = false;
-                self.status_message = String::from("New query draft prepared.");
-            }
-            Message::LoadQueryExample => {
-                self.selected = Section::QueryExplorer;
-                let sql = self
-                    .query_workspace
-                    .example_sql(self.connection_manager.form());
-                self.set_query_sql(&sql);
-                self.result_focus = false;
-                self.status_message = String::from("Example SQL loaded into editor.");
-            }
-            Message::FormatQuery => {
-                self.selected = Section::QueryExplorer;
-                let formatted = QueryWorkspace::format_sql(self.query_workspace.sql());
-                self.set_query_sql(&formatted);
-                self.status_message = String::from("SQL formatting applied.");
-            }
-            Message::ClearQuery => {
-                self.selected = Section::QueryExplorer;
-                self.set_query_sql("");
-                self.result_focus = false;
-                self.status_message = String::from("Query editor cleared.");
-            }
-            Message::ExecuteQuery => {
-                if !(self.selected == Section::Databases && self.database_workspace_active) {
-                    self.selected = Section::QueryExplorer;
-                }
-                self.table_rows_page = None;
-                return self.execute_query();
-            }
-            Message::QueryExecutionFinished(outcome) => {
-                self.query_running = false;
-                let summary = self.query_workspace.apply_execution_outcome(outcome);
-
-                self.result_row_count = summary.row_count;
-                self.result_latency_ms = summary.elapsed_ms;
-                self.status_message = summary.status_message;
-            }
-            Message::SortResultByColumn(column_index) => {
-                return self.sort_result_by_column(column_index);
-            }
             Message::RefreshQuerySchema => {
                 if !(self.selected == Section::Databases && self.database_workspace_active) {
                     self.selected = Section::QueryExplorer;
@@ -549,10 +502,8 @@ impl Akt {
                     return self.refresh_query_schema();
                 }
 
-                let sql = self.query_workspace.set_sql_for_schema_object(&object);
-                self.query_editor = text_editor::Content::with_text(&sql);
                 self.schema_object_menu = None;
-                self.status_message = format!("Prepared query for {}.", object.display_label());
+                self.status_message = format!("Selected {}.", object.display_label());
             }
             Message::ToggleSchemaObject(index) => {
                 let Some(object) = self.query_workspace.schema_objects().get(index).cloned() else {
@@ -667,7 +618,7 @@ impl Akt {
                             self.selected = Section::Databases;
                             self.database_workspace_active = true;
                             self.status_message =
-                                format!("DROP DATABASE confirmation requested for {database}.");
+                                format!("Delete database confirmation requested for {database}.");
                         }
                         Err(error) => self.status_message = error,
                     }
@@ -696,9 +647,7 @@ impl Akt {
 
                 self.result_focus = false;
                 self.status_message = match action {
-                    DatabaseAction::CreateDatabase => {
-                        String::from("CREATE DATABASE statement prepared.")
-                    }
+                    DatabaseAction::CreateDatabase => String::from("Create database form opened."),
                     DatabaseAction::CreateTable => {
                         String::from(i18n::texts(self.language).create_table)
                     }
@@ -707,26 +656,37 @@ impl Akt {
                             Some(database_action_target(driver, &database));
                         self.selected = Section::Databases;
                         self.database_workspace_active = true;
-                        format!("Database details shown for {}.", database_action_target(driver, &database))
+                        format!(
+                            "Database details shown for {}.",
+                            database_action_target(driver, &database)
+                        )
                     }
                     DatabaseAction::AlterDatabaseName => {
-                        self.rename_database_draft =
-                            Some(RenameDatabaseDraft::new(database_action_target(driver, &database)));
-                        self.selected = Section::Databases;
-                        self.database_workspace_active = true;
-                        format!("Rename database form opened for {}.", database_action_target(driver, &database))
-                    }
-                    DatabaseAction::AlterDatabaseCharset => {
-                        self.alter_database_charset_draft = Some(AlterDatabaseCharsetDraft::for_form(
-                            self.connection_manager.form(),
+                        self.rename_database_draft = Some(RenameDatabaseDraft::new(
                             database_action_target(driver, &database),
                         ));
                         self.selected = Section::Databases;
                         self.database_workspace_active = true;
-                        format!("Alter database charset form opened for {}.", database_action_target(driver, &database))
+                        format!(
+                            "Rename database form opened for {}.",
+                            database_action_target(driver, &database)
+                        )
+                    }
+                    DatabaseAction::AlterDatabaseCharset => {
+                        self.alter_database_charset_draft =
+                            Some(AlterDatabaseCharsetDraft::for_form(
+                                self.connection_manager.form(),
+                                database_action_target(driver, &database),
+                            ));
+                        self.selected = Section::Databases;
+                        self.database_workspace_active = true;
+                        format!(
+                            "Alter database charset form opened for {}.",
+                            database_action_target(driver, &database)
+                        )
                     }
                     DatabaseAction::DropDatabase => format!(
-                        "DROP DATABASE statement prepared for {}. Review carefully before execution.",
+                        "Delete database confirmation opened for {}.",
                         database_action_target(driver, &database)
                     ),
                 };
@@ -779,7 +739,7 @@ impl Akt {
                                     self.selected = Section::Databases;
                                     self.database_workspace_active = true;
                                     self.status_message = format!(
-                                        "DROP DATABASE confirmation requested for {}.",
+                                        "Delete database confirmation requested for {}.",
                                         object.name
                                     );
                                 }
@@ -1168,15 +1128,6 @@ impl Akt {
             Message::CreateTableTabSelected(tab) => {
                 self.create_table_tab = tab;
             }
-            Message::CopyCreateTableSql => {
-                let Some(draft) = self.create_table_draft.as_ref() else {
-                    self.status_message = String::from("Create table form is not open.");
-                    return Task::none();
-                };
-                let sql = self.create_table_sql_preview(draft);
-                self.status_message = i18n::texts(self.language).sql_copied.to_owned();
-                return clipboard::write(sql);
-            }
             Message::AddCreateTableColumn => {
                 let driver = self.connection_manager.form().driver;
                 let Some(draft) = self.create_table_draft.as_mut() else {
@@ -1386,15 +1337,8 @@ impl Akt {
                         self.alter_table_draft =
                             Some(AlterTableDraft::new(object.name.clone(), String::new()));
                         self.status_message =
-                            format!("ALTER TABLE form opened for {}.", object.display_label());
+                            format!("Table designer opened for {}.", object.display_label());
                         return self.refresh_table_details(object.name.clone());
-                    }
-                    TableAction::TruncateTable => {
-                        self.selected = Section::Tables;
-                        self.status_message = format!(
-                            "TRUNCATE TABLE requested for {}. Confirmation workflow is next.",
-                            object.display_label()
-                        );
                     }
                     TableAction::DropTable => {
                         self.selected = Section::Tables;
@@ -1405,7 +1349,7 @@ impl Akt {
                             Ok(pending) => {
                                 self.pending_schema_deletion = Some(pending);
                                 self.status_message = format!(
-                                    "DROP TABLE confirmation requested for {}.",
+                                    "Delete table confirmation requested for {}.",
                                     object.display_label()
                                 );
                             }
@@ -1413,9 +1357,6 @@ impl Akt {
                         }
                     }
                 }
-            }
-            Message::LoadTableRowsPage(delta) => {
-                return self.load_table_rows_page(delta);
             }
             Message::TableRowsLoaded(table, page, outcome) => {
                 self.query_running = false;
@@ -1463,7 +1404,7 @@ impl Akt {
             },
             Message::AlterTableTabSelected(tab) => {
                 let Some(draft) = self.alter_table_draft.as_mut() else {
-                    self.status_message = String::from("ALTER TABLE form is not open.");
+                    self.status_message = String::from("Table designer is not open.");
                     return Task::none();
                 };
                 self.alter_table_tab = tab;
@@ -1492,7 +1433,6 @@ impl Akt {
                         draft.constraint_kind =
                             String::from(crate::schema::default_constraint_type(driver));
                     }
-                    AlterTableTab::Ddl => {}
                 }
             }
             Message::SelectAlterTableColumn(index) => {
@@ -1519,6 +1459,12 @@ impl Akt {
                 self.remove_alter_table_column(index);
                 self.selected_alter_table_column = None;
             }
+            Message::RevertSelectedAlterTableChange => {
+                self.revert_selected_alter_table_change();
+            }
+            Message::RevertAllAlterTableChanges => {
+                self.revert_all_alter_table_changes();
+            }
             Message::MoveSelectedAlterTableColumn(delta) => {
                 let Some(index) = self.selected_alter_table_column else {
                     self.status_message = String::from("Select a column row before moving.");
@@ -1534,7 +1480,7 @@ impl Akt {
             }
             Message::ToggleAlterTableIndexColumn(column_name) => {
                 let Some(draft) = self.alter_table_draft.as_mut() else {
-                    self.status_message = String::from("ALTER TABLE form is not open.");
+                    self.status_message = String::from("Table designer is not open.");
                     return Task::none();
                 };
                 draft.operation = AlterTableOperation::AddIndex;
@@ -1551,7 +1497,7 @@ impl Akt {
             Message::PrepareAlterTableIndex => {
                 let driver = self.connection_manager.form().driver;
                 let Some(draft) = self.alter_table_draft.as_mut() else {
-                    self.status_message = String::from("ALTER TABLE form is not open.");
+                    self.status_message = String::from("Table designer is not open.");
                     return Task::none();
                 };
                 draft.operation = AlterTableOperation::AddIndex;
@@ -1564,7 +1510,7 @@ impl Akt {
             Message::ClearAlterTableIndex => {
                 let driver = self.connection_manager.form().driver;
                 let Some(draft) = self.alter_table_draft.as_mut() else {
-                    self.status_message = String::from("ALTER TABLE form is not open.");
+                    self.status_message = String::from("Table designer is not open.");
                     return Task::none();
                 };
                 draft.index_name.clear();
@@ -1577,7 +1523,7 @@ impl Akt {
             }
             Message::AlterTableFieldChanged(field, value) => {
                 let Some(draft) = self.alter_table_draft.as_mut() else {
-                    self.status_message = String::from("ALTER TABLE form is not open.");
+                    self.status_message = String::from("Table designer is not open.");
                     return Task::none();
                 };
 
@@ -1586,9 +1532,18 @@ impl Akt {
                     AlterTableField::NewColumnName => draft.new_column_name = value,
                     AlterTableField::ColumnType => draft.column_type = value,
                     AlterTableField::ColumnDefinition => draft.column_definition = value,
-                    AlterTableField::IndexName => draft.index_name = value,
-                    AlterTableField::IndexColumns => draft.index_columns = value,
-                    AlterTableField::IndexType => draft.index_type = value,
+                    AlterTableField::IndexName => {
+                        draft.operation = AlterTableOperation::AddIndex;
+                        draft.index_name = value;
+                    }
+                    AlterTableField::IndexColumns => {
+                        draft.operation = AlterTableOperation::AddIndex;
+                        draft.index_columns = value;
+                    }
+                    AlterTableField::IndexType => {
+                        draft.operation = AlterTableOperation::AddIndex;
+                        draft.index_type = value;
+                    }
                     AlterTableField::ConstraintName => {
                         draft.operation = AlterTableOperation::AddConstraint;
                         draft.constraint_name = value;
@@ -1604,30 +1559,6 @@ impl Akt {
                     AlterTableField::ColumnPosition => draft.column_position = value,
                     AlterTableField::AfterColumn => draft.after_column = value,
                 }
-            }
-            Message::CopyAlterTableCreateSql => {
-                let Some(draft) = self.alter_table_draft.as_ref() else {
-                    self.status_message = String::from("ALTER TABLE form is not open.");
-                    return Task::none();
-                };
-                let sql = if draft.create_statement().trim().is_empty() {
-                    i18n::texts(self.language)
-                        .create_statement_loading
-                        .to_owned()
-                } else {
-                    draft.create_statement().to_owned()
-                };
-                self.status_message = i18n::texts(self.language).sql_copied.to_owned();
-                return clipboard::write(sql);
-            }
-            Message::CopyAlterTableSql => {
-                let Some(draft) = self.alter_table_draft.as_ref() else {
-                    self.status_message = String::from("ALTER TABLE form is not open.");
-                    return Task::none();
-                };
-                let sql = self.alter_table_sql_preview(draft);
-                self.status_message = i18n::texts(self.language).sql_copied.to_owned();
-                return clipboard::write(sql);
             }
             Message::CancelTableEdit => {
                 self.rename_table_draft = None;
@@ -1699,7 +1630,7 @@ impl Akt {
                 }
 
                 let Some(draft) = self.alter_table_draft.as_ref() else {
-                    self.status_message = String::from("ALTER TABLE form is not open.");
+                    self.status_message = String::from("Table designer is not open.");
                     return Task::none();
                 };
                 let mut form = self.connection_manager.form().clone();
@@ -1714,7 +1645,7 @@ impl Akt {
 
                 self.schema_mutation_running = true;
                 self.selected = Section::Tables;
-                self.status_message = format!("Applying ALTER TABLE to {table}...");
+                self.status_message = format!("Applying structure change to {table}...");
                 return Task::perform(run_execute_sql_task(form, sql), move |outcome| {
                     Message::AlterTableFinished(table.clone(), outcome)
                 });
@@ -1727,37 +1658,18 @@ impl Akt {
                         self.alter_table_tab = AlterTableTab::Columns;
                         self.result_row_count = result.row_count();
                         self.result_latency_ms = Some(result.elapsed_ms);
-                        self.status_message = format!("ALTER TABLE applied to {table}.");
+                        self.status_message = format!("Structure change applied to {table}.");
                         return self.refresh_query_schema();
                     }
                     QueryExecutionOutcome::Failure(messages) => {
                         let detail = messages.join(" ");
                         self.status_message = if detail.is_empty() {
-                            format!("ALTER TABLE failed for {table}.")
+                            format!("Structure change failed for {table}.")
                         } else {
-                            format!("ALTER TABLE failed for {table}: {detail}")
+                            format!("Structure change failed for {table}: {detail}")
                         };
                     }
                 }
-            }
-            Message::RequestResultSearch => {
-                self.status_message =
-                    String::from("Result search requested. Filter input is next.");
-            }
-            Message::ExportResultCsv => {
-                self.status_message = self.export_last_result_csv();
-            }
-            Message::ToggleResultFocus => {
-                self.result_focus = !self.result_focus;
-                self.status_message = if self.result_focus {
-                    String::from("Result grid focus mode enabled.")
-                } else {
-                    String::from("Result grid focus mode disabled.")
-                };
-            }
-            Message::CommitTransaction => {
-                self.status_message =
-                    String::from("Commit requested. Transaction control is not active yet.");
             }
             Message::SystemMetricsTick => {
                 let memory_label = system_metrics::process_memory_label();

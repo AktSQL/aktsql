@@ -411,6 +411,13 @@ fn readonly_database_detail<'a>(
     .into()
 }
 
+fn detail_field_row(label: &'static str, value: impl Into<String>) -> Element<'static, Message> {
+    readonly_database_detail(
+        std::borrow::Cow::Borrowed(label),
+        std::borrow::Cow::Owned(value.into()),
+    )
+}
+
 fn table_detail_panel<'a>(state: &'a Akt, target: &'a str) -> Element<'a, Message> {
     let texts = i18n::texts(state.language());
     let title = if state.table_detail_loading() {
@@ -475,7 +482,7 @@ fn live_table_detail_sections<'a>(
 
     content = content.push(table_columns_panel(state.language(), details));
     content = content.push(table_indexes_panel(state.language(), details));
-    content = content.push(table_create_statement_panel(state.language(), details));
+    content = content.push(table_metadata_summary_panel(state.language(), details));
     content.into()
 }
 
@@ -575,24 +582,88 @@ fn table_indexes_panel<'a>(language: Language, details: &'a TableDetails) -> Ele
     .into()
 }
 
-fn table_create_statement_panel(
+fn result_header_cell(label: String) -> Element<'static, Message> {
+    container(
+        text(label)
+            .size(11)
+            .wrapping(Wrapping::None)
+            .style(theme::primary_text),
+    )
+    .width(RESULT_CELL_WIDTH)
+    .height(30)
+    .padding([6, 8])
+    .style(theme::result_header_cell)
+    .into()
+}
+
+fn result_data_cell(value: &str, row_index: usize) -> Element<'static, Message> {
+    container(
+        text(value.to_owned())
+            .size(11)
+            .wrapping(Wrapping::None)
+            .style(theme::on_surface_text),
+    )
+    .width(RESULT_CELL_WIDTH)
+    .height(30)
+    .padding([6, 8])
+    .style(theme::result_data_cell(row_index))
+    .into()
+}
+
+fn table_metadata_summary_panel(
     language: Language,
     details: &TableDetails,
 ) -> Element<'static, Message> {
-    let texts = i18n::texts(language);
+    let title = match language {
+        Language::ZhCn => "结构摘要",
+        _ => "Structure Summary",
+    };
+    let source_label = match language {
+        Language::ZhCn => "元数据来源",
+        _ => "Metadata Source",
+    };
+    let source = match details.driver {
+        DatabaseDriver::Sqlite => "sqlite_schema",
+        DatabaseDriver::MySql | DatabaseDriver::MariaDb | DatabaseDriver::TiDb => {
+            "information_schema + native metadata"
+        }
+        DatabaseDriver::PostgreSql | DatabaseDriver::CockroachDb => "pg_catalog",
+        DatabaseDriver::MongoDb => "collection metadata",
+        _ => "driver metadata",
+    };
+    let rows = column![
+        detail_field_row(source_label, source),
+        detail_field_row(
+            match language {
+                Language::ZhCn => "字段数量",
+                _ => "Columns",
+            },
+            details.columns.len().to_string(),
+        ),
+        detail_field_row(
+            match language {
+                Language::ZhCn => "索引数量",
+                _ => "Indexes",
+            },
+            details.indexes.len().to_string(),
+        ),
+        detail_field_row(
+            match language {
+                Language::ZhCn => "设计入口",
+                _ => "Designer",
+            },
+            match language {
+                Language::ZhCn => "通过结构化表设计器修改",
+                _ => "Use the structured table designer for changes",
+            },
+        ),
+    ]
+    .spacing(6);
+
     container(
-        column![
-            detail_section_label(texts.create_table_statement),
-            scrollable(
-                text(details.create_statement.clone())
-                    .size(11)
-                    .wrapping(Wrapping::WordOrGlyph)
-                    .style(theme::on_surface_text)
-            )
-            .height(110)
-            .style(theme::scrollable),
-        ]
-        .spacing(6),
+        column![detail_section_label(title), rows]
+            .spacing(6)
+            .width(Length::Fill),
     )
     .style(theme::query_canvas)
     .padding(10)
@@ -664,12 +735,13 @@ fn database_action_button(
     action: DatabaseAction,
     enabled: bool,
 ) -> Element<'static, Message> {
-    let mut button = button(
-        text(label)
-            .size(10)
-            .wrapping(Wrapping::None)
-            .style(theme::on_surface_text),
-    )
+    let mut button = button(text(label).size(10).wrapping(Wrapping::None).style(
+        if matches!(action, DatabaseAction::DropDatabase) || enabled {
+            theme::on_primary_text
+        } else {
+            theme::on_surface_text
+        },
+    ))
     .height(28)
     .padding([6, 9])
     .style(if matches!(action, DatabaseAction::DropDatabase) {
@@ -834,7 +906,7 @@ fn database_table_row(
                     .size(14)
                     .wrapping(Wrapping::None)
                     .style(theme::on_surface_text),
-                text(object.sql_preview())
+                text(object_summary(object))
                     .size(11)
                     .wrapping(Wrapping::WordOrGlyph)
                     .style(theme::secondary_text),
@@ -852,12 +924,20 @@ fn database_table_row(
     .into()
 }
 
+fn object_summary(object: &SchemaObject) -> String {
+    format!("{} · {}", object.kind.label(), object.name)
+}
+
 fn table_action_button(spec: TableActionSpec, index: usize) -> Element<'static, Message> {
     button(
         text(spec.label)
             .size(10)
             .wrapping(Wrapping::None)
-            .style(theme::on_surface_text),
+            .style(if spec.danger {
+                theme::on_primary_text
+            } else {
+                theme::on_surface_text
+            }),
     )
     .height(26)
     .padding([5, 8])
@@ -1040,11 +1120,6 @@ fn table_action_specs(language: Language) -> Vec<TableActionSpec> {
             danger: false,
         },
         TableActionSpec {
-            label: texts.truncate_table,
-            action: TableAction::TruncateTable,
-            danger: true,
-        },
-        TableActionSpec {
             label: texts.delete_table,
             action: TableAction::DropTable,
             danger: true,
@@ -1061,7 +1136,11 @@ fn tree_action_button(
         text(label)
             .size(10)
             .wrapping(Wrapping::None)
-            .style(theme::on_surface_text),
+            .style(if danger {
+                theme::on_primary_text
+            } else {
+                theme::on_surface_text
+            }),
     )
     .width(Length::Fill)
     .height(24)

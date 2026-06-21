@@ -110,22 +110,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn examples_are_driver_specific() {
-        let workspace = QueryWorkspace::default();
-
-        assert!(workspace
-            .example_sql(&ConnectionForm::for_driver(DatabaseDriver::MySql))
-            .contains("information_schema.tables"));
-        assert!(workspace
-            .example_sql(&ConnectionForm::for_driver(DatabaseDriver::PostgreSql))
-            .contains("table_schema not in"));
-        assert_eq!(
-            workspace.example_sql(&ConnectionForm::for_driver(DatabaseDriver::MongoDb)),
-            "{ \"listCollections\": 1 }"
-        );
-    }
-
-    #[test]
     fn mongodb_query_requires_json_object() {
         assert!(parse_mongodb_commands("{ \"ping\": 1 }").is_ok());
         assert!(parse_mongodb_commands("[{ \"ping\": 1 }, { \"buildInfo\": 1 }]").is_ok());
@@ -141,7 +125,7 @@ mod tests {
         );
 
         assert_eq!(object.kind, SchemaObjectKind::Database);
-        assert!(object.sql_preview().contains("myapp_db"));
+        assert_eq!(object.display_label(), "DB myapp_db");
     }
 
     #[test]

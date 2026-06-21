@@ -1,89 +1,89 @@
 ## ADDED Requirements
 
-### Requirement: SQL Query State
+### Requirement: SQL 查询状态
 
-The system SHALL model SQL console state separately from iced rendering.
+系统 SHALL 将 SQL 控制台状态与 iced 渲染分离建模。
 
-#### Scenario: SQL draft is edited
+#### Scenario: SQL 草稿被编辑
 
-- **WHEN** the user changes the SQL input
-- **THEN** the application stores the SQL draft without changing connection profile fields
+- **WHEN** 用户修改 SQL 输入
+- **THEN** 应用保存 SQL 草稿，且不改变连接配置字段
 
-### Requirement: SQLite Query Execution
+### Requirement: SQLite 查询执行
 
-The system SHALL execute SQL against the current SQLite connection profile.
+系统 SHALL 针对当前 SQLite 连接配置执行 SQL。
 
-#### Scenario: User executes a SQLite query returning rows
+#### Scenario: 用户执行返回行的 SQLite 查询
 
-- **WHEN** the current connection driver is SQLite
-- **AND** the SQL statement returns rows
-- **THEN** the system opens the SQLite database file and displays result columns, rows, elapsed time, and row count
+- **WHEN** 当前连接驱动是 SQLite
+- **AND** SQL 语句返回行
+- **THEN** 系统打开 SQLite 数据库文件，并显示结果列、结果行、耗时和行数
 
-#### Scenario: User executes a SQLite statement without result rows
+#### Scenario: 用户执行不返回结果行的 SQLite 语句
 
-- **WHEN** the current connection driver is SQLite
-- **AND** the SQL statement is DDL or DML without result rows
-- **THEN** the system reports affected rows and elapsed time
+- **WHEN** 当前连接驱动是 SQLite
+- **AND** SQL 语句是不返回结果行的 DDL 或 DML
+- **THEN** 系统报告影响行数和耗时
 
-#### Scenario: User executes empty SQL
+#### Scenario: 用户执行空 SQL
 
-- **WHEN** the SQL draft is empty or whitespace
-- **THEN** the system reports a validation error and does not execute a database statement
+- **WHEN** SQL 草稿为空或只有空白
+- **THEN** 系统报告校验错误，且不执行数据库语句
 
-#### Scenario: User executes a non-SQLite profile
+#### Scenario: 用户执行非 SQLite 配置
 
-- **WHEN** the current connection driver is not SQLite
-- **THEN** the system reports that query execution is not yet wired for that driver
+- **WHEN** 当前连接驱动不是 SQLite
+- **THEN** 系统报告该驱动尚未接入查询执行
 
-### Requirement: Query Console UI
+### Requirement: 查询控制台 UI
 
-The system SHALL provide an iced query console view in the Query Explorer workspace.
+系统 SHALL 在 Query Explorer 工作区提供 iced 查询控制台视图。
 
-#### Scenario: User opens Query Explorer
+#### Scenario: 用户打开 Query Explorer
 
-- **WHEN** Query Explorer is selected
-- **THEN** the workspace shows active connection context, SQL input, execute action, result preview, and execution messages
+- **WHEN** 选择 Query Explorer
+- **THEN** 工作区显示活动连接上下文、SQL 输入、执行操作、结果预览和执行消息
 
-#### Scenario: Query result updates global status
+#### Scenario: 查询结果更新全局状态
 
-- **WHEN** a query execution finishes successfully
-- **THEN** the status bar shows the latest row count and elapsed time
+- **WHEN** 查询执行成功完成
+- **THEN** 状态栏显示最新行数和耗时
 
-### Requirement: SQLite Schema Browser
+### Requirement: SQLite 结构浏览器
 
-The system SHALL load SQLite schema objects for the active connection on demand.
+系统 SHALL 按需为活动连接加载 SQLite schema 对象。
 
-#### Scenario: User refreshes Query Explorer schema
+#### Scenario: 用户刷新 Query Explorer schema
 
-- **WHEN** the current connection driver is SQLite
-- **AND** the user refreshes the Query Explorer schema
-- **THEN** the system lists tables, views, and indexes from `sqlite_master`
+- **WHEN** 当前连接驱动是 SQLite
+- **AND** 用户刷新 Query Explorer schema
+- **THEN** 系统从 `sqlite_master` 列出 tables、views 和 indexes
 
-#### Scenario: User selects a schema object
+#### Scenario: 用户选择 schema 对象
 
-- **WHEN** the user selects a table or view from the schema browser
-- **THEN** the SQL editor is populated with a preview query for that object
+- **WHEN** 用户从 schema browser 选择 table 或 view
+- **THEN** SQL 编辑器填入该对象的 preview query
 
-#### Scenario: User refreshes schema for unsupported driver
+#### Scenario: 用户为不支持驱动刷新 schema
 
-- **WHEN** the current connection driver is not SQLite
-- **THEN** the system reports that schema browsing is not yet wired for that driver
+- **WHEN** 当前连接驱动不是 SQLite
+- **THEN** 系统报告该驱动尚未接入 schema browsing
 
-### Requirement: Responsive Query Operations
+### Requirement: 响应式查询操作
 
-The system SHALL keep Query Explorer interactions responsive while database work is in progress.
+系统 SHALL 在数据库工作进行时保持 Query Explorer 交互响应。
 
-#### Scenario: Query execution is started
+#### Scenario: 查询执行启动
 
-- **WHEN** the user starts query execution
-- **THEN** the app returns immediately to the event loop and applies the result after the task finishes
+- **WHEN** 用户启动查询执行
+- **THEN** 应用立即回到事件循环，并在 task 完成后应用结果
 
-#### Scenario: Schema refresh is started
+#### Scenario: Schema 刷新启动
 
-- **WHEN** the user starts schema refresh
-- **THEN** the app returns immediately to the event loop and applies the schema after the task finishes
+- **WHEN** 用户启动 schema 刷新
+- **THEN** 应用立即回到事件循环，并在 task 完成后应用 schema
 
-#### Scenario: Operation is already running
+#### Scenario: 操作已在运行
 
-- **WHEN** a query execution or schema refresh is already running
-- **THEN** duplicate clicks do not enqueue another identical operation
+- **WHEN** 查询执行或 schema 刷新已在运行
+- **THEN** 重复点击不会再次入队相同操作

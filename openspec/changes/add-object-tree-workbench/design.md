@@ -1,37 +1,37 @@
-# Design
+# 设计
 
-## Navigation Model
+## 导航模型
 
-The left side is an object locator, not a duplicate app menu. It presents saved connections, connected databases, and object groups such as tables, views, functions, indexes, and collections. Selecting an object updates the workbench context.
+左侧是对象定位器，而不是重复的应用菜单。它呈现已保存连接、已连接数据库，以及表、视图、函数、索引、集合等对象组。选择对象后更新工作台上下文。
 
-Top-level tools remain separate:
+顶层工具保持独立：
 
-- Query: ad hoc SQL/command execution.
-- History: execution and mutation history.
-- Settings: application preferences.
+- Query：临时 SQL/命令执行。
+- History：执行与变更历史。
+- Settings：应用偏好。
 
-## Create Operations
+## 创建操作
 
-Create operations use forms and execute directly:
+创建操作使用表单并直接执行：
 
-- The form owns required and optional parameters.
-- Submit validates parameters before issuing the database command.
-- Success keeps the user in the database workbench, selects the newly created object when possible, and refreshes the tree.
-- Failure keeps the form open and shows the database error.
+- 表单持有必填和可选参数。
+- 提交前先校验参数，再发出数据库命令。
+- 成功后用户仍留在数据库工作台；可行时选中新建对象，并刷新对象树。
+- 失败后表单保持打开，并显示数据库错误。
 
-SQL preview is not the primary create workflow. Generated SQL can be recorded in logs/details later for auditability.
+创建流程的审阅对象是结构化变更摘要、校验结果和执行反馈。底层执行文本只允许作为内部驱动细节，不进入新增表或修改表结构的人类操作路径。
 
-## Confirmation Boundary
+## 确认边界
 
-Non-destructive creation can execute directly after validation. Destructive or hard-to-reverse operations require confirmation:
+非破坏性创建在校验后可直接执行。破坏性或难以回退的操作需要确认：
 
-- DROP DATABASE and DROP TABLE.
-- TRUNCATE TABLE with database-native semantics where supported.
-- DROP COLUMN, DROP INDEX, and DROP CONSTRAINT.
-- Replace or alter functions/procedures.
+- 删除数据库和删除表。
+- 支持时使用数据库原生语义的清空表。
+- 删除字段、删除索引和删除约束。
+- 替换或修改函数/存储过程。
 
-Confirmations must name the target object and avoid generic "Are you sure?" prompts.
+确认提示必须命名目标对象，避免泛化的“确定吗？”提示。
 
-## Driver Boundary
+## 驱动边界
 
-Direct create database execution is available only where a native driver path exists. Unsupported drivers must return a clear unavailable message instead of generating SQL preview or pretending to execute.
+只有存在原生驱动路径时，才支持直接执行创建数据库。不支持的驱动必须返回明确的不可用消息，不能生成可执行假象。

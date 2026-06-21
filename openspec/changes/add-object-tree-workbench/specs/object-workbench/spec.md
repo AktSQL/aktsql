@@ -1,141 +1,141 @@
-# object-workbench Specification
+# 对象工作台规格
 
 ## ADDED Requirements
 
-### Requirement: Object Tree Navigation
+### Requirement: 对象树导航
 
-The system SHALL use the left database sidebar as an object tree rooted at connections.
+系统 SHALL 将左侧数据库侧栏作为以连接为根的对象树。
 
-#### Scenario: Connected user enters database workbench
+#### Scenario: 已连接用户进入数据库工作台
 
-- **GIVEN** a saved connection is connected
-- **WHEN** the connection succeeds or the user switches to another saved connection
-- **THEN** the application opens the database workbench
-- **AND** the left object tree shows databases or objects available through the current connection
-- **AND** database nodes own database-level actions
-- **AND** table and collection nodes own table-level actions
+- **GIVEN** 已保存连接处于已连接状态
+- **WHEN** 连接成功或用户切换到另一个已保存连接
+- **THEN** 应用打开数据库工作台
+- **AND** 左侧对象树显示当前连接可访问的数据库或对象
+- **AND** 数据库节点拥有数据库级操作
+- **AND** 数据表和集合节点拥有表级操作
 
-### Requirement: Create Database Direct Execution
+### Requirement: 创建数据库直接执行
 
-The system SHALL create databases from a validated form without routing the user through SQL preview.
+系统 SHALL 通过已校验表单创建数据库，并以执行反馈留在对象工作台。
 
-#### Scenario: Supported driver creates a database
+#### Scenario: 支持的驱动创建数据库
 
-- **GIVEN** a connected driver supports direct query execution
-- **AND** the create database form has a valid database name
-- **WHEN** the user submits the form
-- **THEN** the system executes the create command directly
-- **AND** the query editor content is not replaced with generated SQL
-- **AND** the workbench refreshes the database/object tree after success
+- **GIVEN** 已连接驱动支持直接查询执行
+- **AND** 创建数据库表单包含有效数据库名
+- **WHEN** 用户提交表单
+- **THEN** 系统直接执行创建命令
+- **AND** 查询编辑器内容保持不变
+- **AND** 成功后工作台刷新数据库/对象树
 
-#### Scenario: Unsupported driver cannot execute create database
+#### Scenario: 不支持的驱动无法执行创建数据库
 
-- **GIVEN** the selected driver does not yet have a native execution path
-- **WHEN** the user submits the create database form
-- **THEN** the system shows a clear unsupported message
-- **AND** the system does not generate SQL preview as a fallback
+- **GIVEN** 选中的驱动尚无原生执行路径
+- **WHEN** 用户提交创建数据库表单
+- **THEN** 系统显示明确的不支持消息
+- **AND** 系统不会生成可执行假象作为 fallback
 
-### Requirement: Destructive Operation Confirmation
+### Requirement: 破坏性操作确认
 
-The system SHALL require explicit confirmation before destructive schema or data operations.
+系统 SHALL 在破坏性 schema 或数据操作前要求明确确认。
 
-#### Scenario: User requests destructive operation
+#### Scenario: 用户请求破坏性操作
 
-- **GIVEN** a selected database object
-- **WHEN** the user requests DROP, TRUNCATE, or destructive ALTER behavior
-- **THEN** the system asks for confirmation naming the target object
-- **AND** the operation does not execute until confirmation is accepted
+- **GIVEN** 已选中数据库对象
+- **WHEN** 用户请求 DROP、TRUNCATE 或破坏性 ALTER 行为
+- **THEN** 系统要求确认并命名目标对象
+- **AND** 操作在确认被接受前不会执行
 
-### Requirement: Database Object Actions
+### Requirement: 数据库对象操作
 
-The system SHALL expose database-level actions from the database node context menu.
+系统 SHALL 从数据库节点上下文菜单暴露数据库级操作。
 
-#### Scenario: User views database details
+#### Scenario: 用户查看数据库详情
 
-- **GIVEN** a selected database node
-- **WHEN** the user requests database details
-- **THEN** the right workbench shows read-only database details
-- **AND** the detail surface does not expose editable controls
-- **AND** the detail surface contains only metadata for the selected database
-- **AND** table detail and alter-table panels are cleared from the active inspector context
-- **AND** table lists and table action panels are not rendered inside the database-detail surface
-- **AND** the detail surface loads live metadata when the driver supports metadata queries
-- **AND** details are grouped with high-frequency core fields first and lower-frequency storage, object, and runtime fields after them
-- **AND** each parent group has a distinct visual marker
+- **GIVEN** 已选中数据库节点
+- **WHEN** 用户请求数据库详情
+- **THEN** 右侧工作台显示只读数据库详情
+- **AND** 详情界面不暴露可编辑控件
+- **AND** 详情界面只包含选中数据库的元数据
+- **AND** 活动检查器上下文会清除表详情和 alter-table 面板
+- **AND** 数据库详情界面中不渲染数据表列表和数据表操作面板
+- **AND** 驱动支持元数据查询时，详情界面加载实时元数据
+- **AND** 详情按高频核心字段优先、低频存储/对象/运行时字段靠后的方式分组
+- **AND** 每个父级分组都有明确视觉标记
 
-#### Scenario: User renames a database
+#### Scenario: 用户重命名数据库
 
-- **GIVEN** a selected database node
-- **WHEN** the user requests rename database
-- **THEN** the system opens a rename dialog with the current database name and a new name field
-- **AND** submitting the dialog uses the driver-specific rename strategy for PostgreSQL/CockroachDB, MySQL-compatible databases, MongoDB collections, SQLite files, SQL Server, and Oracle
-- **AND** MySQL-compatible database rename builds its table migration plan from live `information_schema` metadata rather than cached tree rows
-- **AND** the schema tree refreshes after success
+- **GIVEN** 已选中数据库节点
+- **WHEN** 用户请求重命名数据库
+- **THEN** 系统打开重命名弹窗，包含当前数据库名和新名称字段
+- **AND** 提交弹窗时，对 PostgreSQL/CockroachDB、MySQL 兼容数据库、MongoDB collections、SQLite 文件、SQL Server 和 Oracle 使用驱动专属重命名策略
+- **AND** MySQL 兼容数据库重命名基于实时 `information_schema` 元数据生成表迁移计划，而不是缓存的树节点行
+- **AND** 成功后刷新 schema tree
 
-#### Scenario: User changes database charset
+#### Scenario: 用户修改数据库字符集
 
-- **GIVEN** a selected database node
-- **WHEN** the user requests database charset change
-- **THEN** the system opens a charset/collation dialog
-- **AND** submitting the dialog executes the charset change directly where the driver supports it
-- **AND** the schema tree refreshes after success
+- **GIVEN** 已选中数据库节点
+- **WHEN** 用户请求修改数据库字符集
+- **THEN** 系统打开字符集/排序规则弹窗
+- **AND** 驱动支持时，提交弹窗会直接执行字符集变更
+- **AND** 成功后刷新 schema tree
 
-#### Scenario: User creates a table from database context
+#### Scenario: 用户从数据库上下文创建数据表
 
-- **GIVEN** a selected database node
-- **WHEN** the user requests create table
-- **THEN** the system opens a create-table dialog using that database as the target context
-- **AND** the dialog exposes a multi-column field grid, index grid, constraint grid, and driver-aware table options such as engine, charset, collation, and comment when applicable
-- **AND** submitting the dialog executes the create-table command directly
-- **AND** the query editor content is not replaced with generated SQL
-- **AND** the schema tree refreshes after success
+- **GIVEN** 已选中数据库节点
+- **WHEN** 用户请求创建数据表
+- **THEN** 系统打开 create-table 弹窗，并将该数据库作为目标上下文
+- **AND** 弹窗暴露多字段网格、索引网格、约束网格，以及适用时的驱动感知表选项，例如 engine、charset、collation 和 comment
+- **AND** 提交弹窗时直接执行 create-table 命令
+- **AND** 查询编辑器内容保持不变
+- **AND** 成功后刷新 schema tree
 
-#### Scenario: User renames a table
+#### Scenario: 用户重命名数据表
 
-- **GIVEN** a selected table or collection node
-- **WHEN** the user requests rename table
-- **THEN** the system opens a rename dialog with the current table name and a new name field
-- **AND** submitting the dialog uses the driver-specific table or collection rename statement
-- **AND** the schema tree refreshes after success
+- **GIVEN** 已选中数据表或集合节点
+- **WHEN** 用户请求重命名数据表
+- **THEN** 系统打开重命名弹窗，包含当前表名和新名称字段
+- **AND** 提交弹窗时使用驱动专属的数据表或集合重命名语句
+- **AND** 成功后刷新 schema tree
 
-#### Scenario: User browses table rows
+#### Scenario: 用户浏览表行
 
-- **GIVEN** a selected table or collection node
-- **WHEN** the user requests row browsing
-- **THEN** the system executes a driver-specific row query directly
-- **AND** the query editor content is not replaced with generated SQL
-- **AND** the result grid shows 100 rows by default
-- **AND** the result grid renders all returned columns instead of truncating to a fixed column count
-- **AND** the result grid remains horizontally scrollable when returned columns exceed the viewport width
-- **AND** pagination controls are shown below the result grid
+- **GIVEN** 已选中数据表或集合节点
+- **WHEN** 用户请求行浏览
+- **THEN** 系统直接执行驱动专属行查询
+- **AND** 查询编辑器内容保持不变
+- **AND** 结果表格默认显示 100 行
+- **AND** 结果表格渲染所有返回列，而不是截断为固定列数
+- **AND** 返回列超过视口宽度时，结果表格保持可横向滚动
+- **AND** 结果表格下方显示分页控件
 
-#### Scenario: User describes a table
+#### Scenario: 用户查看表结构
 
-- **GIVEN** a selected table or collection node
-- **WHEN** the user requests table structure
-- **THEN** the right workbench loads read-only table metadata directly
-- **AND** the detail surface contains only metadata for the selected table or collection
-- **AND** database detail panels are cleared from the active inspector context
-- **AND** database lists and database action panels are not rendered inside the table-detail surface
-- **AND** the detail surface groups core, storage, object, and runtime metadata consistently with database details
-- **AND** the surface includes columns, indexes, and the table CREATE statement when the driver can provide or reconstruct it
-- **AND** columns and indexes remain horizontally scrollable when metadata fields exceed the viewport width
+- **GIVEN** 已选中数据表或集合节点
+- **WHEN** 用户请求表结构
+- **THEN** 右侧工作台直接加载只读表元数据
+- **AND** 详情界面只包含选中数据表或集合的元数据
+- **AND** 活动检查器上下文会清除数据库详情面板
+- **AND** 表详情界面中不渲染数据库列表和数据库操作面板
+- **AND** 详情界面以与数据库详情一致的方式分组 core、storage、object 和 runtime 元数据
+- **AND** 驱动能提供或重构时，界面包含字段、索引和结构摘要
+- **AND** 元数据字段超过视口宽度时，字段和索引保持可横向滚动
 
-#### Scenario: User alters a table
+#### Scenario: 用户修改数据表
 
-- **GIVEN** a selected table node
-- **WHEN** the user requests structure modification
-- **THEN** the right workbench opens an alter-table designer panel instead of a modal dialog
-- **AND** the designer is organized into concise tabs for columns, indexes, constraints, and DDL
-- **AND** column data type uses driver-aware select options instead of an unstructured text field
-- **AND** column placement uses explicit FIRST, AFTER, or LAST position controls
-- **AND** the query editor content is not replaced with generated SQL
-- **AND** the form can submit supported driver-specific operations directly, including rename column, add column, add index, and MySQL-compatible column movement
-- **AND** unsupported operations report why they cannot run instead of falling back to SQL preview
+- **GIVEN** 已选中数据表节点
+- **WHEN** 用户请求结构修改
+- **THEN** 右侧工作台打开 alter-table 设计器面板，而不是 modal 弹窗
+- **AND** 设计器按 columns、indexes、constraints 和 Change Plan 组织为简洁标签页
+- **AND** 字段数据类型使用驱动感知 select 选项，而不是无结构文本字段
+- **AND** 字段位置使用明确的 FIRST、AFTER 或 LAST 位置控件
+- **AND** 查询编辑器内容保持不变
+- **AND** 表单可以直接提交受支持的驱动专属操作，包括重命名字段、新增字段、新增索引和 MySQL 兼容字段移动
+- **AND** 不支持的操作说明无法运行的原因，而不是 fallback 到底层执行文本
 
-#### Scenario: Object workbench copy follows i18n
+#### Scenario: 对象工作台文案跟随 i18n
 
-- **GIVEN** the user changes the application language
-- **WHEN** object workbench labels, tabs, action buttons, tree node kind labels, and metadata headers are rendered
-- **THEN** the user-facing copy is read from the i18n catalog
-- **AND** the default language is Simplified Chinese
+- **GIVEN** 用户修改应用语言
+- **WHEN** 渲染对象工作台标签、tab、操作按钮、树节点类型标签和元数据表头
+- **THEN** 面向用户的文案从 i18n catalog 读取
+- **AND** 默认语言是简体中文

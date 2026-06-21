@@ -117,6 +117,143 @@ impl CreateDatabaseDraft {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum UiFontPreference {
+    PlatformDefault,
+    SystemSans,
+    ReadingSans,
+}
+
+impl UiFontPreference {
+    pub const ALL: [Self; 3] = [Self::PlatformDefault, Self::SystemSans, Self::ReadingSans];
+
+    pub fn label(self) -> &'static str {
+        self.ui_font_name()
+    }
+
+    pub fn config_value(self) -> &'static str {
+        match self {
+            Self::PlatformDefault => "platform_default",
+            Self::SystemSans => "system_sans",
+            Self::ReadingSans => "reading_sans",
+        }
+    }
+
+    pub fn from_config(value: &str) -> Self {
+        match value {
+            "system_sans" => Self::SystemSans,
+            "reading_sans" => Self::ReadingSans,
+            _ => Self::PlatformDefault,
+        }
+    }
+
+    pub fn ui_font_name(self) -> &'static str {
+        match self {
+            Self::PlatformDefault => platform_default_ui_font(),
+            Self::SystemSans => platform_system_sans_font(),
+            Self::ReadingSans => platform_reading_sans_font(),
+        }
+    }
+
+    pub fn mono_font_name(self) -> &'static str {
+        platform_mono_font()
+    }
+}
+
+impl std::fmt::Display for UiFontPreference {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter.write_str(self.label())
+    }
+}
+
+fn platform_default_ui_font() -> &'static str {
+    #[cfg(target_os = "macos")]
+    {
+        "PingFang SC"
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        "Microsoft YaHei"
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        "Noto Sans CJK SC"
+    }
+
+    #[cfg(not(any(target_os = "macos", target_os = "windows", target_os = "linux")))]
+    {
+        "System UI"
+    }
+}
+
+fn platform_system_sans_font() -> &'static str {
+    #[cfg(target_os = "macos")]
+    {
+        ".AppleSystemUIFont"
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        "Segoe UI"
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        "DejaVu Sans"
+    }
+
+    #[cfg(not(any(target_os = "macos", target_os = "windows", target_os = "linux")))]
+    {
+        "System Sans"
+    }
+}
+
+fn platform_reading_sans_font() -> &'static str {
+    #[cfg(target_os = "macos")]
+    {
+        "PingFang SC"
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        "Microsoft YaHei"
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        "WenQuanYi Micro Hei"
+    }
+
+    #[cfg(not(any(target_os = "macos", target_os = "windows", target_os = "linux")))]
+    {
+        "System Sans"
+    }
+}
+
+fn platform_mono_font() -> &'static str {
+    #[cfg(target_os = "macos")]
+    {
+        "Menlo"
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        "Cascadia Mono"
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        "DejaVu Sans Mono"
+    }
+
+    #[cfg(not(any(target_os = "macos", target_os = "windows", target_os = "linux")))]
+    {
+        "System Monospace"
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CreateTableField {
     Name,
     Engine,
@@ -153,11 +290,10 @@ pub enum CreateTableTab {
     Columns,
     Indexes,
     Constraints,
-    Sql,
 }
 
 impl CreateTableTab {
-    pub const ALL: [Self; 4] = [Self::Columns, Self::Indexes, Self::Constraints, Self::Sql];
+    pub const ALL: [Self; 3] = [Self::Columns, Self::Indexes, Self::Constraints];
 }
 
 #[derive(Debug, Clone)]
@@ -458,11 +594,10 @@ pub enum AlterTableTab {
     Columns,
     Indexes,
     Constraints,
-    Ddl,
 }
 
 impl AlterTableTab {
-    pub const ALL: [Self; 4] = [Self::Columns, Self::Indexes, Self::Constraints, Self::Ddl];
+    pub const ALL: [Self; 3] = [Self::Columns, Self::Indexes, Self::Constraints];
 }
 
 #[allow(dead_code)]
@@ -589,10 +724,6 @@ impl AlterTableDraft {
     pub fn original_column_names(&self) -> &[String] {
         &self.original_column_names
     }
-
-    pub fn create_statement(&self) -> &str {
-        &self.create_statement
-    }
 }
 
 #[derive(Debug, Clone)]
@@ -612,22 +743,6 @@ impl TableRowsPage {
             order_by: Vec::new(),
         }
     }
-
-    pub fn table(&self) -> &str {
-        &self.table
-    }
-
-    pub fn page(&self) -> usize {
-        self.page
-    }
-
-    pub fn page_size(&self) -> usize {
-        self.page_size
-    }
-
-    pub fn order_by(&self) -> &[ResultSortKey] {
-        &self.order_by
-    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -637,13 +752,6 @@ pub enum SortDirection {
 }
 
 impl SortDirection {
-    pub(super) fn next(self) -> Option<Self> {
-        match self {
-            Self::Desc => Some(Self::Asc),
-            Self::Asc => None,
-        }
-    }
-
     pub(super) fn sql(self) -> &'static str {
         match self {
             Self::Asc => "ASC",
@@ -659,6 +767,7 @@ pub struct ResultSortKey {
     pub(super) direction: SortDirection,
 }
 
+#[cfg(test)]
 impl ResultSortKey {
     pub(super) fn new(column_index: usize, column_name: String) -> Self {
         Self {
@@ -666,14 +775,6 @@ impl ResultSortKey {
             column_name,
             direction: SortDirection::Desc,
         }
-    }
-
-    pub fn column_index(&self) -> usize {
-        self.column_index
-    }
-
-    pub fn direction(&self) -> SortDirection {
-        self.direction
     }
 }
 

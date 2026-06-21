@@ -1,7 +1,7 @@
 use iced::widget::overlay::menu as menu_widget;
 use iced::widget::{
     button, container, pick_list as pick_list_widget, scrollable as scrollable_widget,
-    text as text_widget, text_editor as text_editor_widget, text_input as text_input_widget,
+    text as text_widget, text_input as text_input_widget,
 };
 use iced::{Background, Border, Color, Shadow, Theme};
 
@@ -23,6 +23,20 @@ impl ThemeMode {
         match self {
             Self::Dark => "Dark",
             Self::Light => "Light",
+        }
+    }
+
+    pub fn config_value(self) -> &'static str {
+        match self {
+            Self::Dark => "dark",
+            Self::Light => "light",
+        }
+    }
+
+    pub fn from_config(value: &str) -> Self {
+        match value {
+            "light" => Self::Light,
+            _ => Self::Dark,
         }
     }
 
@@ -267,38 +281,12 @@ pub fn query_workbench(theme: &Theme) -> container::Style {
         )
 }
 
-pub fn query_header(theme: &Theme) -> container::Style {
-    let palette = Palette::for_theme(theme);
-
-    container::Style::default()
-        .background(palette.surface_low)
-        .color(palette.on_surface)
-        .border(
-            Border::default()
-                .width(1)
-                .color(with_alpha(palette.outline_variant, 0.22)),
-        )
-}
-
 pub fn query_canvas(theme: &Theme) -> container::Style {
     let palette = Palette::for_theme(theme);
 
     container::Style::default()
         .background(palette.surface)
         .color(palette.on_surface)
-}
-
-pub fn query_gutter(theme: &Theme) -> container::Style {
-    let palette = Palette::for_theme(theme);
-
-    container::Style::default()
-        .background(palette.surface)
-        .color(palette.secondary)
-        .border(
-            Border::default()
-                .width(1)
-                .color(with_alpha(palette.outline_variant, 0.42)),
-        )
 }
 
 pub fn result_header_cell(theme: &Theme) -> container::Style {
@@ -312,31 +300,6 @@ pub fn result_header_cell(theme: &Theme) -> container::Style {
                 .width(1)
                 .color(with_alpha(palette.outline_variant, 0.44)),
         )
-}
-
-pub fn result_header_button(active: bool) -> impl Fn(&Theme, button::Status) -> button::Style {
-    move |theme, status| {
-        let palette = Palette::for_theme(theme);
-        let background = if active {
-            palette.surface_container
-        } else if matches!(status, button::Status::Hovered | button::Status::Pressed) {
-            palette.surface_high
-        } else {
-            palette.surface_high
-        };
-        let border_color = if active {
-            with_alpha(palette.primary, 0.72)
-        } else {
-            with_alpha(palette.outline_variant, 0.44)
-        };
-
-        button::Style {
-            background: Some(Background::Color(background)),
-            text_color: palette.primary,
-            border: Border::default().width(1).color(border_color),
-            shadow: Shadow::default(),
-        }
-    }
 }
 
 pub fn result_data_cell(row_index: usize) -> impl Fn(&Theme) -> container::Style {
@@ -580,16 +543,16 @@ pub fn secondary_button(theme: &Theme, status: button::Status) -> button::Style 
 pub fn danger_button(theme: &Theme, status: button::Status) -> button::Style {
     let palette = Palette::for_theme(theme);
     let background = match status {
-        button::Status::Hovered | button::Status::Pressed => palette.error_container,
-        _ => palette.surface_high,
+        button::Status::Hovered | button::Status::Pressed => palette.primary,
+        _ => palette.error_container,
     };
 
     button::Style {
         background: Some(Background::Color(background)),
-        text_color: palette.on_surface,
+        text_color: palette.on_primary_container,
         border: Border::default()
             .width(1)
-            .color(with_alpha(palette.outline_variant, 0.34)),
+            .color(with_alpha(palette.error_container, 0.62)),
         shadow: Shadow::default(),
     }
 }
@@ -719,26 +682,6 @@ pub fn form_text_input(
     text_input_widget::Style {
         background: Background::Color(palette.surface),
         border: Border::default().width(0).color(border_color),
-        icon: palette.secondary,
-        placeholder: palette.outline_variant,
-        value: palette.on_surface,
-        selection: palette.primary,
-    }
-}
-
-pub fn text_editor(theme: &Theme, status: text_editor_widget::Status) -> text_editor_widget::Style {
-    let palette = Palette::for_theme(theme);
-    let border_color = match status {
-        text_editor_widget::Status::Focused => palette.primary,
-        text_editor_widget::Status::Hovered => with_alpha(palette.secondary, 0.82),
-        text_editor_widget::Status::Disabled | text_editor_widget::Status::Active => {
-            with_alpha(palette.outline_variant, 0.62)
-        }
-    };
-
-    text_editor_widget::Style {
-        background: Background::Color(palette.surface),
-        border: Border::default().width(1).color(border_color),
         icon: palette.secondary,
         placeholder: palette.outline_variant,
         value: palette.on_surface,

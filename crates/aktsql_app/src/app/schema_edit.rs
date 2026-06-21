@@ -18,9 +18,11 @@ impl Akt {
         }
 
         if delta.is_negative() {
-            (index > 0).then_some(index - 1)
+            index.checked_sub(1)
         } else {
-            (index + 1 < columns.len()).then_some(index + 1)
+            index
+                .checked_add(1)
+                .filter(|next_index| *next_index < columns.len())
         }
     }
 
@@ -83,7 +85,7 @@ impl Akt {
         };
 
         let Some(draft) = self.alter_table_draft.as_mut() else {
-            self.status_message = String::from("ALTER TABLE form is not open.");
+            self.status_message = String::from("Table designer is not open.");
             return;
         };
         let mut original_column_names = draft.original_column_names.clone();
@@ -119,7 +121,7 @@ impl Akt {
 
         let driver = self.connection_manager.form().driver;
         let Some(draft) = self.alter_table_draft.as_mut() else {
-            self.status_message = String::from("ALTER TABLE form is not open.");
+            self.status_message = String::from("Table designer is not open.");
             return;
         };
 
@@ -157,7 +159,7 @@ impl Akt {
 
         let driver = self.connection_manager.form().driver;
         let Some(draft) = self.alter_table_draft.as_mut() else {
-            self.status_message = String::from("ALTER TABLE form is not open.");
+            self.status_message = String::from("Table designer is not open.");
             return;
         };
         if draft.reordered_columns.len() > draft.original_column_names.len() {
@@ -185,7 +187,7 @@ impl Akt {
 
         let driver = self.connection_manager.form().driver;
         let Some(draft) = self.alter_table_draft.as_mut() else {
-            self.status_message = String::from("ALTER TABLE form is not open.");
+            self.status_message = String::from("Table designer is not open.");
             return;
         };
 
@@ -204,6 +206,124 @@ impl Akt {
         self.status_message = String::from("Pending ADD COLUMN row removed.");
     }
 
+    pub(super) fn revert_selected_alter_table_change(&mut self) {
+        let Some(draft) = self.alter_table_draft.as_ref() else {
+            self.status_message = String::from("Table designer is not open.");
+            return;
+        };
+
+        match self.alter_table_tab {
+            AlterTableTab::Indexes if draft.operation == AlterTableOperation::AddIndex => {
+                self.clear_alter_table_index_draft();
+                self.status_message = String::from("Selected ADD INDEX change reverted.");
+                return;
+            }
+            AlterTableTab::Constraints if draft.operation == AlterTableOperation::AddConstraint => {
+                self.clear_alter_table_constraint_draft();
+                self.status_message = String::from("Selected ADD CONSTRAINT change reverted.");
+                return;
+            }
+            _ => {}
+        }
+
+        let Some(index) = self.selected_alter_table_column else {
+            self.status_message = String::from("Select a column change before reverting.");
+            return;
+        };
+
+        if !self.ensure_alter_table_column_draft() {
+            return;
+        }
+
+        let Some(draft) = self.alter_table_draft.as_mut() else {
+            self.status_message = String::from("Table designer is not open.");
+            return;
+        };
+
+        if index >= draft.reordered_columns.len() {
+            self.status_message = String::from("Column row was not found.");
+            return;
+        }
+
+        if is_pending_alter_table_column(draft, index) {
+            draft.reordered_columns.remove(index);
+            reset_alter_table_column_operation(draft, self.connection_manager.form().driver);
+            self.selected_alter_table_column = None;
+            self.status_message = String::from("Selected ADD COLUMN change reverted.");
+            return;
+        }
+
+        let Some(details) = self.table_details.as_ref() else {
+            self.status_message = String::from("Table metadata is still loading.");
+            return;
+        };
+        let original_name = draft.original_column_names.get(index).cloned().or_else(|| {
+            draft
+                .reordered_columns
+                .get(index)
+                .map(|column| column.name.clone())
+        });
+        let Some(original_name) = original_name else {
+            self.status_message = String::from("Original column was not found.");
+            return;
+        };
+        let Some(original_column) = details
+            .columns
+            .iter()
+            .find(|column| column.name.eq_ignore_ascii_case(&original_name))
+            .cloned()
+        else {
+            self.status_message = String::from("Original column metadata was not found.");
+            return;
+        };
+
+        if index < draft.reordered_columns.len() {
+            draft.reordered_columns[index] = original_column;
+        }
+        draft.original_column_names = details
+            .columns
+            .iter()
+            .map(|column| column.name.clone())
+            .collect();
+        if draft.operation == AlterTableOperation::MoveColumn {
+            draft.reordered_columns = details.columns.clone();
+        }
+        reset_alter_table_column_operation(draft, self.connection_manager.form().driver);
+        self.status_message = String::from("Selected column change reverted.");
+    }
+
+    pub(super) fn revert_all_alter_table_changes(&mut self) {
+        let driver = self.connection_manager.form().driver;
+        let Some(draft) = self.alter_table_draft.as_mut() else {
+            self.status_message = String::from("Table designer is not open.");
+            return;
+        };
+
+        if let Some(details) = self.table_details.as_ref() {
+            draft.original_column_names = details
+                .columns
+                .iter()
+                .map(|column| column.name.clone())
+                .collect();
+            draft.reordered_columns = details.columns.clone();
+            draft.create_statement = details.create_statement.clone();
+        } else {
+            draft.original_column_names.clear();
+            draft.reordered_columns.clear();
+        }
+
+        reset_alter_table_column_operation(draft, driver);
+        draft.index_name.clear();
+        draft.index_columns.clear();
+        draft.index_type = String::from(crate::schema::default_index_type(driver));
+        draft.constraint_name.clear();
+        draft.constraint_kind = String::from(crate::schema::default_constraint_type(driver));
+        draft.constraint_expression.clear();
+        self.selected_alter_table_column = None;
+        self.alter_table_tab = AlterTableTab::Columns;
+        self.status_message = String::from("All structure changes reverted.");
+    }
+
     pub(super) fn update_alter_table_column(
         &mut self,
         index: usize,
@@ -215,7 +335,7 @@ impl Akt {
         }
 
         let Some(draft) = self.alter_table_draft.as_mut() else {
-            self.status_message = String::from("ALTER TABLE form is not open.");
+            self.status_message = String::from("Table designer is not open.");
             return;
         };
         if draft.reordered_columns.len() > draft.original_column_names.len()
@@ -226,6 +346,7 @@ impl Akt {
             );
             return;
         }
+        let original_name = draft.original_column_names.get(index).cloned();
         let Some(column) = draft.reordered_columns.get_mut(index) else {
             self.status_message = String::from("Column row was not found.");
             return;
@@ -238,11 +359,21 @@ impl Akt {
             CreateTableColumnField::DefaultValue => column.default_value = value,
             CreateTableColumnField::Extra => column.extra = value,
         }
+        let edited_name = column.name.clone();
 
         if is_pending_alter_table_column(draft, index) {
             sync_alter_table_add_column(draft, index);
+        } else if matches!(field, CreateTableColumnField::Name) {
+            if let Some(original_name) = original_name {
+                draft.operation = AlterTableOperation::RenameColumn;
+                draft.column_name = original_name;
+                draft.new_column_name = edited_name;
+            }
         } else {
-            draft.operation = AlterTableOperation::MoveColumn;
+            self.status_message = String::from(
+                "This existing column attribute is read-only; rename and reorder are supported.",
+            );
+            return;
         }
         self.alter_table_tab = AlterTableTab::Columns;
         self.status_message = String::from("Table structure draft updated. Apply to execute.");
@@ -254,7 +385,7 @@ impl Akt {
             return false;
         };
         let Some(draft) = self.alter_table_draft.as_mut() else {
-            self.status_message = String::from("ALTER TABLE form is not open.");
+            self.status_message = String::from("Table designer is not open.");
             return false;
         };
 
@@ -268,6 +399,46 @@ impl Akt {
         }
 
         true
+    }
+}
+
+fn reset_alter_table_column_operation(draft: &mut AlterTableDraft, driver: DatabaseDriver) {
+    draft.operation = AlterTableOperation::RenameColumn;
+    draft.column_name.clear();
+    draft.new_column_name.clear();
+    draft.column_type = default_alter_table_column_type(driver);
+    draft.column_definition.clear();
+    draft.column_position = String::from("LAST");
+    draft.after_column.clear();
+}
+
+fn clear_alter_table_index_draft_impl(draft: &mut AlterTableDraft, driver: DatabaseDriver) {
+    draft.operation = AlterTableOperation::RenameColumn;
+    draft.index_name.clear();
+    draft.index_columns.clear();
+    draft.index_type = String::from(crate::schema::default_index_type(driver));
+}
+
+fn clear_alter_table_constraint_draft_impl(draft: &mut AlterTableDraft, driver: DatabaseDriver) {
+    draft.operation = AlterTableOperation::RenameColumn;
+    draft.constraint_name.clear();
+    draft.constraint_kind = String::from(crate::schema::default_constraint_type(driver));
+    draft.constraint_expression.clear();
+}
+
+impl Akt {
+    fn clear_alter_table_index_draft(&mut self) {
+        let driver = self.connection_manager.form().driver;
+        if let Some(draft) = self.alter_table_draft.as_mut() {
+            clear_alter_table_index_draft_impl(draft, driver);
+        }
+    }
+
+    fn clear_alter_table_constraint_draft(&mut self) {
+        let driver = self.connection_manager.form().driver;
+        if let Some(draft) = self.alter_table_draft.as_mut() {
+            clear_alter_table_constraint_draft_impl(draft, driver);
+        }
     }
 }
 

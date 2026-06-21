@@ -1,29 +1,29 @@
-## Why
+## 为什么
 
-Akt needs its first committed application stack so the product can move from prototype documents to an actual desktop database manager. Rust with iced gives the project a native, robust foundation aligned with the requirement for stability, clear module boundaries, and a compact workbench UI.
+Akt 需要第一个提交到仓库的应用技术栈，让产品从原型文档推进到真实桌面数据库管理器。Rust 与 iced 能提供原生、稳健的基础，并符合稳定性、清晰模块边界和紧凑工作台 UI 的要求。
 
-## What Changes
+## 变更内容
 
-- Add a Rust workspace and initial `aktsql` desktop application crate.
-- Use iced as the desktop UI framework.
-- Implement the first application shell: top bar, sidebar navigation, main workspace placeholder, and status bar.
-- Add theme scaffolding for Akt's dark red/black identity and a light-mode placeholder.
-- Add module boundaries for app state, theme, UI shell, and future database capabilities.
-- Add basic verification commands for formatting, checking, and running the desktop app.
+- 添加 Rust workspace 和初始 `aktsql` 桌面应用 crate。
+- 使用 iced 作为桌面 UI 框架。
+- 实现第一个应用主壳：顶部栏、侧栏导航、主工作区占位和状态栏。
+- 为 Akt 的暗红/黑色品牌识别添加主题脚手架，并提供亮色模式占位。
+- 为应用状态、主题、UI 主壳和后续数据库能力建立模块边界。
+- 添加格式化、检查和运行桌面应用的基础验证命令。
 
-## Capabilities
+## 能力
 
-### New Capabilities
+### 新增能力
 
-- `desktop-app-shell`: Rust/iced desktop application shell, navigation layout, status bar, theme foundation, and stable module boundaries.
+- `desktop-app-shell`：Rust/iced 桌面应用主壳、导航布局、状态栏、主题基础和稳定模块边界。
 
-### Modified Capabilities
+### 修改能力
 
-- None.
+- 无。
 
-## Impact
+## 影响
 
-- Adds Rust/Cargo project files and source code.
-- Adds iced as the first application framework dependency.
-- Updates repository documentation with build, run, and verification commands.
-- Establishes the initial architecture that later changes will extend for connections, query console, table designer, and database metadata.
+- 添加 Rust/Cargo 项目文件和源码。
+- 添加 iced 作为第一个应用框架依赖。
+- 更新仓库文档，加入构建、运行和验证命令。
+- 建立初始架构，后续连接管理、查询控制台、表设计器和数据库元数据能力将在其上扩展。

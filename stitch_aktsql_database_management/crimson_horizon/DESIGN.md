@@ -83,79 +83,79 @@ spacing:
   density-comfortable: 12px
 ---
 
-## Brand & Style
+## 品牌与风格
 
-The design system is engineered for high-performance database management, drawing inspiration from the efficiency and precision of the Unix philosophy and the striking visual identity of the Akt. The brand personality is authoritative, clandestine, and utility-obsessed. It targets technical power users who prioritize speed of thought and data density over decorative flourishes.
+该设计系统服务于高性能数据库管理，灵感来自 Unix 哲学的效率与精确性，以及 Akt 鲜明的视觉识别。品牌性格应当权威、隐秘、专注工具效率。目标用户是技术型高阶用户，他们更重视思考速度和数据密度，而不是装饰性效果。
 
-The visual style is a fusion of **Modern Minimalism** and **Technical Brutalism**. It utilizes high-contrast interfaces, sharp geometric containers, and a rigid adherence to functional hierarchy. The emotional response is one of total control—a "Dawn of Database Management" where complex operations feel surgical and decisive.
+视觉风格融合 **现代极简主义** 与 **技术粗野主义**。界面使用高对比、锋利几何容器，并严格遵循功能层级。它应带来“完全掌控”的感受，也就是 `Dawn of Database Management`：复杂操作像手术一样精确、果断。
 
-## Colors
+## 颜色
 
-The palette is anchored by "Crimson Red," used strictly for primary actions, critical states, and brand highlights. 
+色板以 “Crimson Red” 为核心，只用于主操作、关键状态和品牌强调。
 
-**Dark Mode (Default):**
-Uses "Deep Black" (#0A0A0A) for the primary canvas to minimize eye strain and maximize contrast. Surfaces are layered using subtle shifts in gray (#1A1A1A) to maintain a flat, technical aesthetic without relying on traditional shadows.
+**暗色模式（默认）：**
+主画布使用 “Deep Black” (#0A0A0A)，以降低视觉疲劳并提高对比。表面层级通过细微灰度变化 (#1A1A1A) 表达，保持扁平、技术化的观感，不依赖传统阴影。
 
-**Light Mode:**
-Reverts to a sterile "Clean White" (#FFFFFF) and "Slate Gray" (#F5F5F5) foundation. Crimson Red remains the high-alert accent, ensuring brand continuity while providing a high-legibility environment for daylight operations.
+**亮色模式：**
+基础回到克制的 “Clean White” (#FFFFFF) 和 “Slate Gray” (#F5F5F5)。Crimson Red 继续作为高警示强调色，在延续品牌的同时，为日间使用提供高可读环境。
 
-**Semantic Utility:**
-- **Success:** Emerald Green (reserved for query completions).
-- **Warning:** Deep Amber.
-- **Error/Critical:** Crimson Red.
+**语义颜色：**
+- **成功**：Emerald Green，保留给查询完成等状态。
+- **警告**：Deep Amber。
+- **错误/关键**：Crimson Red。
 
-## Typography
+## 字体
 
-This design system employs a dual-font strategy to separate UI navigation from data processing. 
+该设计系统采用双字体策略，用于区分 UI 导航和数据处理场景。
 
-- **Inter (Sans-serif):** Used for all structural UI elements, navigation, and headers. It provides a neutral, professional tone that keeps the interface modern.
-- **JetBrains Mono (Monospace):** The workhorse for all data-heavy contexts, including SQL editors, cell values, and metadata labels. 
+- **Inter（无衬线）**：用于所有结构性 UI 元素、导航和标题。它提供中性、专业的语气，让界面保持现代。
+- **JetBrains Mono（等宽）**：用于所有数据密集场景，包括 SQL 编辑器、单元格值和元数据标签。
 
-Typography is scaled for high density. Line heights are kept tight to allow more information per screen inch, mirroring the efficiency of a terminal environment.
+字体比例面向高密度界面。行高保持紧凑，让每英寸屏幕容纳更多信息，接近终端环境的效率。
 
-## Layout & Spacing
+## 布局与间距
 
-The layout follows a **Fixed Grid** model for sidebar-driven navigation and a **Fluid Grid** for data tables and editors. 
+布局在侧栏驱动导航中采用 **固定网格**，在数据表格和编辑器中采用 **流式网格**。
 
-- **Sidebar:** Fixed at 240px for primary navigation.
-- **Main Canvas:** Uses a 12-column system with tight 12px gutters.
-- **Data Density:** Spacing is strictly based on a 4px baseline grid. Elements in the database view use "Compact" spacing (4px/8px) to maximize the "above-the-fold" data visibility.
+- **侧栏**：主导航固定为 240px。
+- **主画布**：使用 12 列系统，列间距为紧凑的 12px。
+- **数据密度**：间距严格基于 4px 基线网格。数据库视图中的元素使用 “Compact” 间距（4px/8px），最大化首屏可见数据。
 
-**Mobile Reflow:**
-For the rare mobile use case, the 12-column grid collapses to a single column, and the sidebar is hidden behind a crimson-accented drawer menu. High-density tables switch to a horizontal scroll or card-stack view.
+**移动端重排：**
+针对少量移动端场景，12 列网格折叠为单列，侧栏隐藏在带 Crimson 强调色的抽屉菜单后。高密度表格切换为横向滚动或卡片堆叠视图。
 
-## Elevation & Depth
+## 层级与深度
 
-This design system rejects soft shadows and ambient light. Depth is communicated through **Tonal Layers** and **Bold Outlines**.
+该设计系统拒绝柔和阴影和环境光。深度通过 **色调层级** 与 **强轮廓** 表达。
 
-- **Level 0 (Base):** Deep Black (#0A0A0A) for the workspace background.
-- **Level 1 (Panels):** Slate Gray (#1A1A1A) with a 1px solid border (#333333).
-- **Level 2 (Popovers/Tooltips):** Lighter Gray (#2A2A2A) with a Crimson Red 2px top-border to indicate "active" focus.
+- **Level 0（基础）**：工作区背景使用 Deep Black (#0A0A0A)。
+- **Level 1（面板）**：Slate Gray (#1A1A1A)，配 1px 实线边框 (#333333)。
+- **Level 2（浮层/提示）**：更浅的 Gray (#2A2A2A)，顶部使用 2px Crimson Red 边框表示“激活”焦点。
 
-Interactive elements do not "lift" off the page; instead, they change border color or background saturation to signal state changes. This maintains the "flat terminal" feel of the Unix philosophy.
+交互元素不通过“浮起”表达状态，而是改变边框颜色或背景饱和度。这能保持 Unix 哲学下“扁平终端”的感觉。
 
-## Shapes
+## 形状
 
-The shape language is strictly **Sharp (0px)**. 
+形状语言严格采用 **Sharp (0px)**。
 
-Every UI element—from buttons and input fields to large container cards—features 90-degree corners. This evokes a sense of technical precision and structural rigidity. The only exception to the "no curves" rule is the Crimson Red cloud-inspired brand mark, which acts as a visual disruptor against the clinical sharpness of the interface.
+所有 UI 元素，从按钮、输入框到大型容器卡片，都使用 90 度直角。这会形成技术精确与结构刚性的感觉。唯一突破“无圆角”规则的是 Crimson Red 云形品牌标志，它作为视觉扰动，对冲界面的冷峻锋利。
 
-## Components
+## 组件
 
-**Buttons:** 
-Sharp corners. Primary buttons are solid Crimson Red with White text. Secondary buttons are ghost-style with a 1px white or gray border. No gradients or shadows.
+**按钮：**
+使用直角。主按钮为实心 Crimson Red，文字为 White。次级按钮为 ghost 样式，使用 1px 白色或灰色边框。不使用渐变或阴影。
 
-**Input Fields:**
-Dark backgrounds with a 1px bottom-border only. When focused, the border turns Crimson Red. Errors are indicated by a solid red left-border.
+**输入框：**
+深色背景，仅保留 1px 底边框。聚焦时边框变为 Crimson Red。错误状态通过实心红色左边框表示。
 
-**Data Tables:**
-The core component. Minimal padding, Zebra striping using #111111 on the Deep Black base. Column headers use Monospace font in all-caps.
+**数据表格：**
+核心组件。使用最小内边距，在 Deep Black 基础上用 #111111 做斑马纹。列头使用等宽字体与大写样式。
 
-**Chips/Badges:**
-Used for status (e.g., "Connected," "Indexing"). These are small, rectangular blocks with solid color fills and Monospace text.
+**标签/徽标：**
+用于状态，例如 “Connected”、“Indexing”。样式为小型矩形块，使用实心色填充和等宽文字。
 
-**Navigation Rail:**
-A slim 64px vertical bar on the far left, containing sharp, minimal line icons. Active states are indicated by a high-saturation Crimson Red vertical line.
+**导航轨：**
+最左侧为 64px 细竖栏，包含锋利、极简的线性图标。激活状态通过高饱和 Crimson Red 竖线表示。
 
-**Query Editor:**
-Full-width monospaced environment with syntax highlighting that utilizes the Crimson and Slate palette for a bespoke, branded coding experience.
+**查询编辑器：**
+全宽等宽环境，语法高亮使用 Crimson 与 Slate 色板，形成定制化、品牌化的编码体验。

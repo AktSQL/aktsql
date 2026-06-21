@@ -12,13 +12,33 @@ const CONFIG_DIR_ENV: &str = "AKTSQL_CONFIG_DIR";
 struct AppConfig {
     version: u32,
     connections: Vec<ConnectionProfile>,
+    #[serde(default)]
+    preferences: AppPreferences,
 }
 
 impl AppConfig {
-    fn new(connections: &[ConnectionProfile]) -> Self {
+    fn new(connections: &[ConnectionProfile], preferences: AppPreferences) -> Self {
         Self {
             version: 1,
             connections: connections.to_vec(),
+            preferences,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AppPreferences {
+    pub language: String,
+    pub theme: String,
+    pub ui_font: String,
+}
+
+impl Default for AppPreferences {
+    fn default() -> Self {
+        Self {
+            language: String::from("zh_cn"),
+            theme: String::from("dark"),
+            ui_font: String::from("platform_default"),
         }
     }
 }
@@ -37,7 +57,31 @@ pub fn load_connection_profiles() -> Result<Vec<ConnectionProfile>, String> {
 
 pub fn save_connection_profiles(profiles: &[ConnectionProfile]) -> Result<(), String> {
     let path = preferred_config_path();
-    let config = AppConfig::new(profiles);
+    let preferences = load_preferences().unwrap_or_default();
+    let config = AppConfig::new(profiles, preferences);
+    write_config(&path, &config)
+}
+
+pub fn load_preferences() -> Result<AppPreferences, String> {
+    let Some(path) = readable_config_path() else {
+        return Ok(AppPreferences::default());
+    };
+
+    let raw = fs::read_to_string(&path).map_err(|error| read_error(&path, error))?;
+    let config: AppConfig = serde_json::from_str(&raw)
+        .map_err(|error| format!("Failed to parse {}: {error}", path.display()))?;
+
+    Ok(config.preferences)
+}
+
+pub fn save_preferences(preferences: &AppPreferences) -> Result<(), String> {
+    let path = preferred_config_path();
+    let connections = load_connection_profiles().unwrap_or_default();
+    let config = AppConfig::new(&connections, preferences.clone());
+    write_config(&path, &config)
+}
+
+fn write_config(path: &Path, config: &AppConfig) -> Result<(), String> {
     let raw = serde_json::to_string_pretty(&config)
         .map_err(|error| format!("Failed to serialize {}: {error}", path.display()))?;
 

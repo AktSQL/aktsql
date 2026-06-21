@@ -69,12 +69,7 @@ pub(super) fn sidebar(state: &Akt) -> Element<'_, Message> {
 }
 
 fn sidebar_tools(state: &Akt) -> Element<'static, Message> {
-    let tools = [
-        Section::QueryExplorer,
-        Section::History,
-        Section::Settings,
-        Section::Support,
-    ];
+    let tools = [Section::Settings];
 
     tools
         .into_iter()

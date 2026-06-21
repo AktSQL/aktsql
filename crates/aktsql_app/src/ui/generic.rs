@@ -2,7 +2,7 @@ use super::{chip, section_label};
 use crate::app::{Akt, Message, QuickAction};
 use crate::i18n;
 use crate::theme;
-use iced::widget::{button, column, container, horizontal_rule, row, text, Space};
+use iced::widget::{button, column, container, row, text, Space};
 use iced::{Alignment, Element, Length};
 
 pub(super) fn generic_workspace(state: &Akt) -> Element<'_, Message> {
@@ -16,7 +16,7 @@ pub(super) fn generic_workspace(state: &Akt) -> Element<'_, Message> {
         ),
         capability_panel(
             texts.query_console_placeholder,
-            "SQL editor, execution results, schema tree"
+            "Object browser, structured actions, execution feedback"
         ),
         capability_panel(
             texts.metadata_diagrams_placeholder,
@@ -42,25 +42,6 @@ pub(super) fn generic_workspace(state: &Akt) -> Element<'_, Message> {
             .align_y(Alignment::Center),
             quick_actions(),
             cards,
-            container(
-                column![
-                    text(texts.next_capability_placeholders.to_uppercase())
-                        .size(11)
-                        .style(theme::secondary_text),
-                    horizontal_rule(1),
-                    placeholder_row("01", texts.table_designer_placeholder, "DDL draft surface"),
-                    placeholder_row(
-                        "02",
-                        texts.system_logs,
-                        "Connection events and query history"
-                    ),
-                    placeholder_row("03", texts.messages, "Driver diagnostics and notices"),
-                ]
-                .spacing(12),
-            )
-            .style(theme::panel)
-            .width(Length::Fill)
-            .padding(18),
         ]
         .spacing(16)
         .padding([28, 32]),
@@ -90,28 +71,6 @@ fn capability_panel(title: &'static str, detail: &'static str) -> Element<'stati
     .width(Length::FillPortion(1))
     .height(Length::Fill)
     .padding(16)
-    .into()
-}
-
-fn placeholder_row(
-    index: &'static str,
-    title: &'static str,
-    detail: &'static str,
-) -> Element<'static, Message> {
-    row![
-        text(index).size(12).style(theme::primary_text),
-        column![
-            text(title.trim_start_matches("- "))
-                .size(14)
-                .style(theme::on_surface_text),
-            text(detail).size(11).style(theme::secondary_text),
-        ]
-        .spacing(3)
-        .width(Length::Fill),
-        text("READY").size(10).style(theme::secondary_text),
-    ]
-    .spacing(14)
-    .align_y(Alignment::Center)
     .into()
 }
 

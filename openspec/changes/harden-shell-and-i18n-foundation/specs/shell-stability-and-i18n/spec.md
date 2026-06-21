@@ -1,46 +1,46 @@
 ## ADDED Requirements
 
-### Requirement: Fixed Native Window Shell
-The system SHALL present Akt in a fixed-size desktop window while preserving standard native close and minimize behavior.
+### Requirement: 固定原生窗口主壳
+系统 SHALL 在固定尺寸桌面窗口中呈现 Akt，同时保留标准原生关闭和最小化行为。
 
-#### Scenario: Application window opens
-- **WHEN** the desktop application starts
-- **THEN** the window uses the Akt application title
-- **THEN** the window opens at the fixed product size
-- **THEN** the window keeps native decorations enabled
+#### Scenario: 应用窗口打开
+- **WHEN** 桌面应用启动
+- **THEN** 窗口使用 Akt 应用标题
+- **THEN** 窗口以固定产品尺寸打开
+- **THEN** 窗口保持原生装饰启用
 
-#### Scenario: User minimizes the window
-- **WHEN** the user activates the native minimize control
-- **THEN** the operating system receives a standard minimize request
+#### Scenario: 用户最小化窗口
+- **WHEN** 用户触发原生最小化控件
+- **THEN** 操作系统收到标准最小化请求
 
-### Requirement: Bounded Connection Manager Layout
-The system SHALL constrain connection manager lists, forms, validation messages, and status text so they fit within the fixed application window.
+### Requirement: 有界连接管理器布局
+系统 SHALL 约束连接管理器列表、表单、校验消息和状态文本，使其适配固定应用窗口。
 
-#### Scenario: User opens the connection manager
-- **WHEN** the Databases workspace is selected
-- **THEN** the profile list has an explicit fixed width
-- **THEN** the editable form has an explicit maximum width
-- **THEN** overflowing vertical form content remains reachable through scrolling
+#### Scenario: 用户打开连接管理器
+- **WHEN** 选择 Databases 工作区
+- **THEN** 配置列表有明确固定宽度
+- **THEN** 可编辑表单有明确最大宽度
+- **THEN** 垂直溢出的表单内容仍可通过滚动访问
 
-#### Scenario: Long profile or driver labels are shown
-- **WHEN** a profile name, target, driver label, validation message, or status message is longer than its available container
-- **THEN** the UI displays a bounded shortened label instead of resizing the container
+#### Scenario: 显示长配置或驱动标签
+- **WHEN** 配置名称、目标、驱动标签、校验消息或状态消息长于可用容器
+- **THEN** UI 显示有界短标签，而不是拉伸容器
 
-### Requirement: Language-Ready Text Boundaries
-The system SHALL keep active shell and connection-manager user-facing copy in a centralized text catalog before runtime language switching is introduced.
+### Requirement: 语言就绪文本边界
+系统 SHALL 在引入运行时语言切换前，将活跃 shell 和连接管理器的面向用户文案保存在集中化文本目录中。
 
-#### Scenario: Shell text is rendered
-- **WHEN** top navigation, side navigation, status text, connection form labels, or connection actions are rendered
-- **THEN** the text is read from the i18n text catalog or a typed domain label
+#### Scenario: 渲染 shell 文本
+- **WHEN** 渲染顶部导航、侧边导航、状态文本、连接表单标签或连接操作
+- **THEN** 文本从 i18n 文本目录或类型化领域标签读取
 
-### Requirement: Stable Connection Config Persistence
-The system SHALL persist saved connection profiles to a stable Akt configuration file without storing passwords.
+### Requirement: 稳定连接配置持久化
+系统 SHALL 将已保存连接配置持久化到稳定 Akt 配置文件，且不存储密码。
 
-#### Scenario: Profiles are saved
-- **WHEN** the user saves or deletes a connection profile
-- **THEN** the app writes the connection profile list to the preferred Akt config path
-- **THEN** saved profile data does not include the password field
+#### Scenario: 配置被保存
+- **WHEN** 用户保存或删除连接配置
+- **THEN** 应用将连接配置列表写入首选 Akt 配置路径
+- **THEN** 已保存配置数据不包含密码字段
 
-#### Scenario: Existing development config is present
-- **WHEN** the preferred Akt config path is empty and `aktsql.config.json` exists in the working directory
-- **THEN** the app loads the working-directory config as a fallback
+#### Scenario: 存在既有开发配置
+- **WHEN** 首选 Akt 配置路径为空，且工作目录中存在 `aktsql.config.json`
+- **THEN** 应用将工作目录配置作为 fallback 加载

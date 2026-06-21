@@ -1,15 +1,15 @@
-# Akt Database Manager (Akt) - Project Specification
+# Akt 数据库管理器 (Akt) - 项目规格
 
-## Vision
-A high-performance, Unix-inspired database management tool that prioritizes utility, speed, and a compact interface. The design honors the Akt aesthetic: powerful, mysterious, and sharp.
+## 愿景
+一个受 Unix 思想启发的高性能数据库管理工具，优先关注实用性、速度和紧凑界面。设计延续 Akt 美学：强大、神秘、锋利。
 
-## Core Features
-1. **Multi-DB Support**: SQL Server (2000+), MySQL, PostgreSQL, SQLite, Oracle.
-2. **Unix Philosophy**: "Do one thing and do it well." Clean UI, keyboard-centric, high information density.
-3. **Appearance Customization**: Deep support for Light/Dark modes, font adjustments (UI & Editor), and custom themes.
-4. **Tool-First Layout**: Similar to Navicat but streamlined. Persistent sidebar, tabbed editor, result grid with advanced filtering.
+## 核心功能
+1. **多数据库支持**：SQL Server (2000+)、MySQL、PostgreSQL、SQLite、Oracle。
+2. **Unix 哲学**：做一件事，并把它做好。界面清晰、键盘优先、信息密度高。
+3. **外观自定义**：深度支持亮色/暗色模式、字体调整（UI 与编辑器）和自定义主题。
+4. **工具优先布局**：类似 Navicat 但更精简。常驻侧栏、标签式编辑器、支持高级过滤的结果表格。
 
-## Design Goals
-- **Color Palette**: Red (#E60000), Black (#0A0A0A), Dark Gray (#1A1A1A).
-- **Typography**: Inter for UI, JetBrains Mono for SQL/Data.
-- **Vibe**: Professional, "hacker-ready," stable.
+## 设计目标
+- **色板**：红色 (#E60000)、黑色 (#0A0A0A)、深灰色 (#1A1A1A)。
+- **字体**：不随包内置字体；UI 从本机系统字体选择，macOS 优先苹方，Windows 优先微软雅黑，Linux 优先系统中文 sans；SQL/数据区优先系统等宽字体。
+- **气质**：专业、适合技术用户、稳定。

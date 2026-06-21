@@ -1,5 +1,4 @@
 use super::*;
-use std::fs;
 
 impl Akt {
     pub(in crate::app) fn persist_connections(&self, success: &str) -> String {
@@ -83,96 +82,6 @@ impl Akt {
         Task::perform(run_connection_test_task(form), move |outcome| {
             Message::ConnectionConnectFinished(token, outcome)
         })
-    }
-
-    pub(in crate::app) fn export_last_result_csv(&self) -> String {
-        let Some(result) = self.query_workspace.last_result() else {
-            return String::from("No result set is available for CSV export.");
-        };
-
-        if result.columns.is_empty() {
-            return String::from("Current result has no tabular rows to export.");
-        }
-
-        let path = "/tmp/aktsql-last-result.csv";
-        let mut csv = String::new();
-        csv.push_str(&csv_row(&result.columns));
-
-        for row in &result.rows {
-            csv.push_str(&csv_row(row));
-        }
-
-        match fs::write(path, csv) {
-            Ok(()) => format!("CSV exported to {path}."),
-            Err(error) => format!("CSV export failed: {error}"),
-        }
-    }
-
-    pub(in crate::app) fn set_query_sql(&mut self, sql: &str) {
-        self.query_editor = text_editor::Content::with_text(sql);
-        self.query_workspace.set_sql(sql.to_owned());
-        self.query_result_order_by.clear();
-        self.table_rows_page = None;
-    }
-
-    pub(in crate::app) fn execute_query(&mut self) -> Task<Message> {
-        if self.query_running {
-            self.status_message = String::from("Query is already running.");
-            return Task::none();
-        }
-
-        if self.connection_manager.selected_profile_id().is_none() {
-            self.status_message =
-                String::from("No active connection. Connect a saved profile before querying.");
-            return Task::none();
-        }
-
-        let form = self.connection_manager.form().clone();
-        let sql = match ordered_query_sql(
-            form.driver,
-            self.query_workspace.sql(),
-            &self.query_result_order_by,
-        ) {
-            Ok(sql) => sql,
-            Err(error) => {
-                self.status_message = error;
-                return Task::none();
-            }
-        };
-
-        self.query_running = true;
-        self.status_message = String::from("Executing query...");
-
-        Task::perform(
-            run_execute_sql_task(form, sql),
-            Message::QueryExecutionFinished,
-        )
-    }
-
-    pub(in crate::app) fn sort_result_by_column(&mut self, column_index: usize) -> Task<Message> {
-        if self.query_running {
-            self.status_message = String::from("Query is already running.");
-            return Task::none();
-        }
-
-        let Some(result) = self.query_workspace.last_result() else {
-            self.status_message = String::from("No result set is available for sorting.");
-            return Task::none();
-        };
-        let Some(column_name) = result.columns.get(column_index).cloned() else {
-            self.status_message = String::from("Sort column was not found in the result set.");
-            return Task::none();
-        };
-
-        if let Some(page) = self.table_rows_page.as_mut() {
-            toggle_order_key(&mut page.order_by, column_index, column_name);
-            return self.load_table_rows_page(0);
-        }
-
-        toggle_order_key(&mut self.query_result_order_by, column_index, column_name);
-        self.selected = Section::QueryExplorer;
-        self.result_focus = true;
-        self.execute_query()
     }
 
     pub(in crate::app) fn refresh_query_schema(&mut self) -> Task<Message> {

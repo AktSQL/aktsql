@@ -12,7 +12,6 @@ pub(in crate::ui) fn create_table_designer_panel<'a>(
     } else {
         texts.create_table
     };
-
     container(
         column![
             row![
@@ -33,11 +32,7 @@ pub(in crate::ui) fn create_table_designer_panel<'a>(
                     .padding([0, 12])
                     .style(theme::secondary_button)
                     .on_press(Message::CancelCreateTable),
-                button(button_label(title, 11))
-                    .height(28)
-                    .padding([0, 14])
-                    .style(theme::primary_button)
-                    .on_press(Message::SubmitCreateTable),
+                create_table_submit_button(title, true),
             ]
             .spacing(10)
             .align_y(Alignment::Center),
@@ -51,6 +46,23 @@ pub(in crate::ui) fn create_table_designer_panel<'a>(
     .padding([12, 14])
     .width(Length::Fill)
     .into()
+}
+
+fn create_table_submit_button(title: &'static str, enabled: bool) -> Element<'static, Message> {
+    let mut action = button(button_label(title, 11))
+        .height(28)
+        .padding([0, 14])
+        .style(if enabled {
+            theme::primary_button
+        } else {
+            theme::secondary_button
+        });
+
+    if enabled {
+        action = action.on_press(Message::SubmitCreateTable);
+    }
+
+    action.into()
 }
 
 fn create_table_options_panel<'a>(
@@ -141,14 +153,17 @@ fn create_table_tab_button(
         CreateTableTab::Columns => texts.columns,
         CreateTableTab::Indexes => texts.indexes,
         CreateTableTab::Constraints => texts.constraints,
-        CreateTableTab::Sql => texts.create_table_statement,
     };
 
     button(
         text(label.to_uppercase())
             .size(10)
             .wrapping(Wrapping::None)
-            .style(theme::on_surface_text),
+            .style(if active {
+                theme::on_primary_text
+            } else {
+                theme::on_surface_text
+            }),
     )
     .height(26)
     .padding([0, 12])
@@ -172,13 +187,6 @@ fn create_table_tab_content<'a>(
         CreateTableTab::Columns => create_table_columns_panel(language, driver, draft),
         CreateTableTab::Indexes => create_table_indexes_panel(language, driver, draft),
         CreateTableTab::Constraints => create_table_constraints_panel(language, driver, draft),
-        CreateTableTab::Sql => sql_preview_block(
-            language,
-            i18n::texts(language).create_table_statement,
-            state.create_table_sql_preview(draft),
-            Message::CopyCreateTableSql,
-            220,
-        ),
     }
 }
 

@@ -493,22 +493,12 @@ fn sqlite_file_field(form: &ConnectionForm, language: Language) -> Element<'_, M
         text(texts.database_file.to_uppercase())
             .size(11)
             .style(theme::secondary_text),
-        row![
-            text_input("./database.sqlite", &form.location)
-                .on_input(|value| Message::ConnectionFieldChanged(ConnectionField::Location, value))
-                .style(theme::form_text_input)
-                .width(Length::Fill)
-                .padding([6, 0])
-                .size(14),
-            button(button_label("BROWSE", 11))
-                .width(78)
-                .height(28)
-                .padding([0, 8])
-                .style(theme::secondary_button)
-                .on_press(Message::BrowseDatabaseFile),
-        ]
-        .spacing(10)
-        .align_y(Alignment::Center),
+        text_input("./database.sqlite", &form.location)
+            .on_input(|value| Message::ConnectionFieldChanged(ConnectionField::Location, value))
+            .style(theme::form_text_input)
+            .width(Length::Fill)
+            .padding([6, 0])
+            .size(14),
         container(Space::with_height(1))
             .style(theme::input_underline)
             .height(1)

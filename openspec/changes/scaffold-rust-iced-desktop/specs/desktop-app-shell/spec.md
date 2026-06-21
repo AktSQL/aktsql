@@ -1,36 +1,36 @@
 ## ADDED Requirements
 
-### Requirement: Desktop app launches
-The system SHALL provide a Rust desktop application named AktSQL Database Management that launches with iced.
+### Requirement: 桌面应用可启动
+系统 SHALL 提供名为 AktSQL Database Management 的 Rust 桌面应用，并使用 iced 启动。
 
-#### Scenario: Launch application
-- **WHEN** the user runs the desktop application
-- **THEN** a window opens with Akt branding
+#### Scenario: 启动应用
+- **WHEN** 用户运行桌面应用
+- **THEN** 打开带有 Akt 品牌的窗口
 
-### Requirement: Workbench shell is visible
-The desktop application SHALL display a database-manager workbench shell with a top bar, left navigation, central workspace, and bottom status bar.
+### Requirement: 工作台主壳可见
+桌面应用 SHALL 显示数据库管理器工作台主壳，包含顶部栏、左侧导航、中央工作区和底部状态栏。
 
-#### Scenario: View initial shell
-- **WHEN** the desktop application opens
-- **THEN** the user sees top navigation, sidebar navigation, workspace content, and status information
+#### Scenario: 查看初始主壳
+- **WHEN** 桌面应用打开
+- **THEN** 用户看到顶部导航、侧栏导航、工作区内容和状态信息
 
-### Requirement: Theme foundation exists
-The desktop application SHALL include dark and light theme modes with Akt red/black branding as the default visual direction.
+### Requirement: 主题基础存在
+桌面应用 SHALL 包含暗色和亮色主题模式，并以 Akt 红黑品牌作为默认视觉方向。
 
-#### Scenario: Toggle theme mode
-- **WHEN** the user activates the theme toggle
-- **THEN** the application switches between dark and light theme state without closing the window
+#### Scenario: 切换主题模式
+- **WHEN** 用户触发主题切换
+- **THEN** 应用在不关闭窗口的情况下切换暗色和亮色主题状态
 
-### Requirement: Navigation shell is stateful
-The desktop application SHALL track the selected navigation area in application state.
+### Requirement: 导航主壳有状态
+桌面应用 SHALL 在应用状态中跟踪当前选中的导航区域。
 
-#### Scenario: Select navigation item
-- **WHEN** the user selects a sidebar navigation item
-- **THEN** the selected item is visually indicated and the workspace title changes to match it
+#### Scenario: 选择导航项
+- **WHEN** 用户选择侧栏导航项
+- **THEN** 选中项被视觉标记，工作区标题随之变化
 
-### Requirement: Verification commands are documented
-The repository SHALL document how to run, format, and check the Rust iced application.
+### Requirement: 验证命令已记录
+仓库 SHALL 记录如何运行、格式化和检查 Rust iced 应用。
 
-#### Scenario: Read repository commands
-- **WHEN** a developer opens the repository documentation
-- **THEN** they can find commands to run the desktop app and perform basic Rust verification
+#### Scenario: 阅读仓库命令
+- **WHEN** 开发者打开仓库文档
+- **THEN** 能找到运行桌面应用和执行基础 Rust 验证的命令

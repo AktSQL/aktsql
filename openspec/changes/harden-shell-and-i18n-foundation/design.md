@@ -1,36 +1,36 @@
-## Context
+## 上下文
 
-The iced shell already has a prototype-aligned desktop layout, native theme switching, a connection manager surface, and local connection profile state. Recent feedback exposed two stability issues: form controls can exceed the fixed working area, and minimize behavior must remain standard while maximize/resizing stays unavailable in practice.
+iced 主壳已经具备原型对齐的桌面布局、原生主题切换、连接管理器界面和本地连接配置状态。近期反馈暴露出两个稳定性问题：表单控件可能超出固定工作区；在最大化/调整大小实际不可用的情况下，最小化行为仍必须保持标准。
 
-The next database features will add denser forms, SQL editors, data grids, import/export dialogs, and i18n. The shell therefore needs predictable layout limits, centralized text, and stable config persistence before more UI is layered on top.
+后续数据库功能会加入更密集的表单、SQL 编辑器、数据表格、导入/导出弹窗和 i18n。因此在叠加更多 UI 前，主壳需要可预测的布局边界、集中化文本和稳定配置持久化。
 
-## Goals / Non-Goals
+## 目标 / 非目标
 
-**Goals:**
+**目标：**
 
-- Keep the application at a fixed 1280x800 content target without relying on fragile custom window controls.
-- Preserve standard close and minimize behavior through native window decorations.
-- Prevent the connection manager form and profile list from overflowing the fixed window.
-- Centralize more shell and connection-manager copy in the i18n module.
-- Save connection profiles in a stable Akt config location when the platform provides one, while keeping a working-directory fallback for development.
+- 将应用保持在固定的 1280x800 内容目标，不依赖脆弱的自定义窗口控件。
+- 通过原生窗口装饰保留标准关闭和最小化行为。
+- 防止连接管理器表单和配置列表溢出固定窗口。
+- 在 i18n 模块中集中更多 shell 与连接管理器文案。
+- 平台提供稳定 Akt 配置位置时，将连接配置保存到该位置；同时保留工作目录 fallback 以便开发。
 
-**Non-Goals:**
+**非目标：**
 
-- No runtime language switcher yet.
-- No password persistence or keychain integration.
-- No SQL editor, autocomplete, metadata tree, table designer, or data grid implementation in this slice.
-- No redesign of the prototype visual direction.
+- 暂不实现运行时语言切换器。
+- 不实现密码持久化或钥匙串集成。
+- 本切片不实现 SQL 编辑器、自动补全、元数据树、表设计器或数据表格。
+- 不重新设计原型视觉方向。
 
-## Decisions
+## 决策
 
-- **Use native decorations for window controls.** Native close/minimize is more reliable than self-drawn buttons across Linux window managers. Fixed size is enforced with equal min/max window dimensions rather than a custom maximize button.
-- **Keep layout constraints local to UI construction.** Width constants for sidebar, connection list, and form bounds live near the view functions. This keeps styling and layout concerns out of connection state.
-- **Continue the Unix-style module split.** `main.rs` owns window bootstrapping, `ui.rs` owns layout, `theme.rs` owns colors/styles, `i18n.rs` owns text, and `persistence.rs` owns config file I/O.
-- **Do not persist secrets.** Passwords remain skipped during serialization. A later security slice can choose keychain or encrypted storage.
-- **Prefer a platform config directory with fallback.** The persistence module should pick a per-user config path when available; otherwise it should keep using `aktsql.config.json` in the working directory so development remains simple.
+- **窗口控件使用原生装饰。** 在不同 Linux 窗口管理器上，原生关闭/最小化比自绘按钮更可靠。固定尺寸通过相同的 min/max 窗口尺寸强制，而不是自定义最大化按钮。
+- **布局约束保留在 UI 构造附近。** 侧栏、连接列表和表单边界的宽度常量靠近 view 函数。这让样式和布局关注点不进入连接状态。
+- **继续 Unix 风格模块拆分。** `main.rs` 负责窗口启动，`ui.rs` 负责布局，`theme.rs` 负责颜色/样式，`i18n.rs` 负责文本，`persistence.rs` 负责配置文件 I/O。
+- **不持久化 secret。** 序列化时继续跳过密码。后续安全切片可选择钥匙串或加密存储。
+- **优先使用平台配置目录，并提供回退路径。** persistence 模块应在可用时选择用户级配置路径；否则继续使用工作目录下的 `aktsql.config.json`，让开发保持简单。
 
-## Risks / Trade-offs
+## 风险 / 取舍
 
-- **Some window managers may still show a maximize button when min/max sizes are equal** -> the fixed size constraints prevent effective resize; if a target platform still exposes an active maximize affordance, revisit with platform-specific window attributes.
-- **Centralizing every string at once can create churn** -> only move active shell and connection-manager copy in this slice, then continue as new surfaces are built.
-- **Config path migration can strand existing local files** -> load from the stable config path first, then fall back to the working-directory file if present.
+- **某些窗口管理器在 min/max 尺寸相同时仍可能显示最大化按钮** -> 固定尺寸约束会阻止有效 resize；如果目标平台仍暴露可用的最大化入口，再使用平台专属窗口属性处理。
+- **一次性集中所有字符串会带来 churn** -> 本切片只迁移当前活跃 shell 与连接管理器文案，后续新界面再持续迁移。
+- **配置路径迁移可能遗留现有本地文件** -> 先从稳定配置路径加载；若为空且工作目录文件存在，再 fallback 到工作目录文件。

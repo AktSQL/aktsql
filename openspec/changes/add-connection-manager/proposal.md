@@ -1,28 +1,28 @@
-## Why
+## 为什么
 
-Akt needs a real connection management foundation before database browsing, SQL completion, import/export, and table design can become meaningful. The first implementation should make connection parameters explicit and validated instead of hiding them behind loose strings.
+在数据库浏览、SQL 补全、导入导出和表设计具备实际意义前，Akt 需要真实的连接管理基础。第一版实现应让连接参数显式、可校验，而不是隐藏在松散字符串后面。
 
-## What Changes
+## 变更内容
 
-- Add a connection manager capability for creating, editing, selecting, testing, and deleting saved database connection profiles.
-- Introduce a typed connection parameter model covering common Navicat-style fields and engine-specific defaults for MySQL, PostgreSQL, and SQLite.
-- Add an iced connection manager view with profile list, driver selector, editable parameter form, and status feedback.
-- Keep actual network/database driver connection execution out of this change; test/save actions are local placeholders until the database execution layer is introduced.
-- No breaking changes.
+- 添加连接管理能力，用于创建、编辑、选择、测试和删除已保存数据库连接配置。
+- 引入类型化连接参数模型，覆盖常见 Navicat 风格字段，以及 MySQL、PostgreSQL 和 SQLite 的引擎专属默认值。
+- 添加 iced 连接管理视图，包含配置列表、驱动选择器、可编辑参数表单和状态反馈。
+- 本次变更不包含真实网络/数据库驱动连接执行；在数据库执行层引入前，测试/保存动作是本地占位。
+- 无破坏性变更。
 
-## Capabilities
+## 能力
 
-### New Capabilities
+### 新增能力
 
-- `connection-manager`: Database connection profile modeling, validation, and desktop UI workflow.
+- `connection-manager`：数据库连接配置建模、校验和桌面 UI 工作流。
 
-### Modified Capabilities
+### 修改能力
 
-- None.
+- 无。
 
-## Impact
+## 影响
 
-- Affected code: `crates/aktsql_app/src/app.rs`, `crates/aktsql_app/src/ui.rs`, plus new focused modules for connection state and model definitions.
-- Affected UI: Databases workspace becomes a connection manager surface rather than a placeholder.
-- Affected docs/specs: OpenSpec change artifacts define the connection profile contract.
-- Dependencies: No new runtime dependency in this change.
+- 受影响代码：`crates/aktsql_app/src/app.rs`、`crates/aktsql_app/src/ui.rs`，以及用于连接状态和模型定义的新聚焦模块。
+- 受影响 UI：Databases 工作区从占位界面变为连接管理界面。
+- 受影响文档/specs：OpenSpec change artifacts 定义连接配置契约。
+- 依赖：本次变更不新增运行时依赖。

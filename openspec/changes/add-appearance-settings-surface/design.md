@@ -1,15 +1,15 @@
-## Context
+## 上下文
 
-The appearance prototype is a dense workbench page with persistent shell navigation, a large title, and compact panels for theme, density, typography, and keybindings.
+外观原型是一个高密度工作台页面，包含常驻 shell 导航、大标题，以及主题、密度、字体和快捷键的紧凑面板。
 
-## Decisions
+## 决策
 
-- Keep this first slice UI-only except for reusing the existing theme toggle.
-- Keep configuration controls lightweight until persisted settings are introduced.
-- Preserve the existing fixed-size desktop window and nonblocking update path.
+- 除复用现有主题切换外，第一版切片只做 UI。
+- 在引入持久化设置前，配置控件保持轻量。
+- 保留现有固定尺寸桌面窗口和非阻塞 update 路径。
 
-## Non-Goals
+## 非目标
 
-- No settings persistence in this slice.
-- No custom font discovery or file-system theme import.
-- No keybinding remapping engine.
+- 本切片不实现设置持久化。
+- 不实现自定义字体发现或文件系统主题导入。
+- 不实现快捷键重映射引擎。

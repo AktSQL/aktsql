@@ -1,35 +1,35 @@
-## Context
+## 上下文
 
-The current Rust iced app has a desktop shell, navigation, theme switching, window controls, quick actions, and status feedback. The Databases workspace still shows a placeholder, while the product requirements call for Navicat-like connection parameter completeness and validation before real database workflows are added.
+当前 Rust iced 应用已有桌面主壳、导航、主题切换、窗口控件、快捷操作和状态反馈。Databases 工作区仍是占位，而产品需求要求在加入真实数据库工作流前，先具备类似 Navicat 的连接参数完整性和校验。
 
-The repository has no database execution layer yet. This change therefore introduces connection profile modeling and UI state only, keeping network I/O and driver integration outside the first slice.
+仓库尚无数据库执行层。因此本次变更只引入连接配置建模和 UI 状态，把网络 I/O 与驱动集成保留在第一个切片之外。
 
-## Goals / Non-Goals
+## 目标 / 非目标
 
-**Goals:**
+**目标：**
 
-- Add a typed connection profile model for MySQL, PostgreSQL, and SQLite.
-- Expose common connection fields: name, driver, host/path, port, username, password, database, charset, collation, SSL, SSH tunnel, timeout, and notes.
-- Provide stable defaults, including `utf8mb4` charset and `utf8mb4_bin` collation for MySQL-compatible database creation flows.
-- Add local validation for required fields and numeric ranges.
-- Replace the Databases placeholder with an iced connection manager surface.
-- Keep UI state changes deterministic and testable through pure Rust data structures where possible.
+- 添加 MySQL、PostgreSQL 和 SQLite 的类型化连接配置模型。
+- 暴露通用连接字段：名称、驱动、主机/路径、端口、用户名、密码、数据库、字符集、排序规则、SSL、SSH 隧道、超时和备注。
+- 提供稳定默认值，包括 MySQL 兼容数据库创建流程中的 `utf8mb4` 字符集和 `utf8mb4_bin` 排序规则。
+- 为必填字段和数值范围添加本地校验。
+- 用 iced 连接管理界面替换 Databases 占位。
+- 尽量通过纯 Rust 数据结构让 UI 状态变化保持确定且可测试。
 
-**Non-Goals:**
+**非目标：**
 
-- No real database network connection is opened in this change.
-- No password persistence, encryption, keychain integration, or config file persistence is added in this change.
-- No SQL metadata loading, schema tree refresh, or table autocomplete is added in this change.
+- 本次变更不打开真实数据库网络连接。
+- 本次变更不添加密码持久化、加密、钥匙串集成或配置文件持久化。
+- 本次变更不添加 SQL 元数据加载、schema tree 刷新或表自动补全。
 
-## Decisions
+## 决策
 
-- **Use a focused `connection` module.** Connection enums, form state, profile state, validation, and defaulting live outside `app.rs`; `app.rs` only coordinates messages and global status. This keeps the code closer to Unix philosophy: small pieces with narrow responsibilities.
-- **Use driver-specific defaults now, not stringly typed fields.** MySQL, PostgreSQL, and SQLite each provide defaults through `DatabaseDriver`. This prevents later UI branching from depending on ad hoc label strings.
-- **Model test/save as local validation first.** The UI will validate parameters and update status. Actual driver calls can later replace the placeholder without changing form messages.
-- **Keep password visible as an ordinary string field for now.** iced text input wiring is straightforward; secure storage and masking will be handled in a dedicated persistence/security change.
+- **使用聚焦的 `connection` 模块。** 连接 enum、表单状态、配置状态、校验和默认值放在 `app.rs` 之外；`app.rs` 只协调消息和全局状态。这让代码更接近 Unix 哲学：小组件、窄职责。
+- **现在就使用驱动专属默认值，而不是字符串化字段。** MySQL、PostgreSQL 和 SQLite 都通过 `DatabaseDriver` 提供默认值，避免后续 UI 分支依赖临时标签字符串。
+- **先把测试/保存建模为本地校验。** UI 会校验参数并更新状态。后续可用真实驱动调用替换占位，而无需改变表单消息。
+- **暂时将密码作为普通字符串字段显示。** iced text input 接线直接；安全存储和掩码将放到专门的持久化/安全变更中处理。
 
-## Risks / Trade-offs
+## 风险 / 取舍
 
-- **Placeholder test action may be mistaken for real connectivity** -> status text will explicitly say the profile is locally valid and driver connection is pending.
-- **Connection parameter set can grow quickly** -> this change implements the common base plus the first engine-specific defaults, leaving advanced pages such as SSL certificate files and SSH identities for later slices.
-- **No persistence yet** -> saved profiles live only in app memory. This is acceptable for the UI and model slice, but persistence must follow before user-facing release.
+- **占位测试动作可能被误认为真实连接** -> 状态文本会明确说明配置仅本地有效，驱动连接仍待接入。
+- **连接参数集合可能快速膨胀** -> 本次变更实现通用基础和首批引擎专属默认值，SSL 证书文件、SSH 身份等高级页面留给后续切片。
+- **尚无持久化** -> 已保存配置只存在于应用内存中。对 UI 和模型切片而言可以接受，但面向用户发布前必须补上持久化。

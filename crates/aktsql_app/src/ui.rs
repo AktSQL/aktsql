@@ -3,15 +3,14 @@ use crate::app::{
     CreateDatabaseDraft, CreateDatabaseField, CreateTableColumnDraft, CreateTableColumnField,
     CreateTableConstraintDraft, CreateTableConstraintField, CreateTableDraft, CreateTableField,
     CreateTableIndexDraft, CreateTableIndexField, CreateTableTab, DatabaseAction,
-    DatabaseEditField, Message, RenameDatabaseDraft, RenameTableDraft, ResultSortKey,
-    SchemaDeletionKind, Section, SortDirection, TableAction, TableEditField,
+    DatabaseEditField, Message, RenameDatabaseDraft, RenameTableDraft, SchemaDeletionKind, Section,
+    TableAction, TableEditField,
 };
 use crate::connection::{ConnectionField, ConnectionForm, ConnectionManager, DatabaseDriver};
 use crate::i18n::{self, Language};
 use crate::product::APP_SHORT_NAME;
 use crate::query::{
-    DatabaseDetailSectionKind, DatabaseDetails, QueryResult, SchemaObject, SchemaObjectKind,
-    TableDetails,
+    DatabaseDetailSectionKind, DatabaseDetails, SchemaObject, SchemaObjectKind, TableDetails,
 };
 use crate::theme;
 use iced::alignment::{Horizontal, Vertical};
@@ -19,7 +18,7 @@ use iced::widget::scrollable::{Direction as ScrollDirection, Scrollbar};
 use iced::widget::text::Wrapping;
 use iced::widget::{
     button, column, container, horizontal_rule, mouse_area, pick_list, row, scrollable, text,
-    text_editor, text_input, Space, Stack,
+    text_input, Space, Stack,
 };
 use iced::{Alignment, Element, Length, Padding};
 
@@ -29,7 +28,6 @@ mod dialogs;
 mod form;
 mod generic;
 mod query_workspace;
-mod results;
 mod schema_designer;
 mod settings;
 mod shell;
@@ -38,8 +36,7 @@ pub(in crate::ui) use database_workbench::{
     database_workbench_view, detail_section_label, query_sidebar_schema,
 };
 use form::*;
-pub(in crate::ui) use query_workspace::{chip, query_workspace_view, schema_refresh_button};
-use results::*;
+pub(in crate::ui) use query_workspace::{chip, schema_refresh_button};
 
 const TOP_BAR_HEIGHT: f32 = 48.0;
 const STATUS_BAR_HEIGHT: f32 = 24.0;
@@ -53,8 +50,6 @@ const CONNECTION_CARD_HEIGHT: f32 = 68.0;
 const TOP_COMMAND_HEIGHT: f32 = 28.0;
 const TOP_REFRESH_WIDTH: f32 = 94.0;
 const TOP_PRIMARY_WIDTH: f32 = 72.0;
-const TITLE_LANGUAGE_WIDTH: f32 = 136.0;
-const TITLE_LANGUAGE_DROPDOWN_RIGHT_OFFSET: f32 = 84.0;
 const WINDOW_CONTROL_SIZE: f32 = 28.0;
 const TITLE_BAR_PADDING: Padding = Padding {
     top: 4.0,
@@ -73,11 +68,7 @@ const LIST_FILTER_WIDTH: f32 = 70.0;
 const FORM_ACTION_HEIGHT: f32 = 34.0;
 const FORM_TEST_WIDTH: f32 = 136.0;
 const FORM_SAVE_WIDTH: f32 = 220.0;
-const RESULT_INDEX_WIDTH: f32 = 54.0;
 const RESULT_CELL_WIDTH: f32 = 124.0;
-const QUERY_CONTEXT_HEIGHT: f32 = 42.0;
-const QUERY_EDITOR_HEIGHT: f32 = 240.0;
-const QUERY_LINE_GUTTER_WIDTH: f32 = 48.0;
 
 pub fn view(state: &Akt) -> Element<'_, Message> {
     let shell = column![
@@ -89,11 +80,6 @@ pub fn view(state: &Akt) -> Element<'_, Message> {
 
     let content = Stack::new()
         .push(shell)
-        .push_maybe(
-            state
-                .language_menu_open()
-                .then(|| shell::language_dropdown(state.language())),
-        )
         .push_maybe(
             state
                 .test_result_open()
@@ -192,10 +178,6 @@ fn workspace(state: &Akt) -> Element<'_, Message> {
         );
     }
 
-    if state.selected() == Section::QueryExplorer {
-        return query_console_view(state);
-    }
-
     if state.selected() == Section::Tables
         && state.connection_manager().selected_profile_id().is_some()
     {
@@ -207,14 +189,6 @@ fn workspace(state: &Akt) -> Element<'_, Message> {
     }
 
     generic::generic_workspace(state)
-}
-
-fn query_console_view(state: &Akt) -> Element<'_, Message> {
-    container(query_workspace_view(state))
-        .style(theme::workspace)
-        .width(Length::Fill)
-        .height(Length::Fill)
-        .into()
 }
 
 fn status_bar(state: &Akt) -> Element<'_, Message> {

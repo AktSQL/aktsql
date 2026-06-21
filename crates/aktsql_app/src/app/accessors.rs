@@ -13,8 +13,8 @@ impl Akt {
         self.language
     }
 
-    pub fn language_menu_open(&self) -> bool {
-        self.language_menu_open
+    pub fn ui_font_preference(&self) -> UiFontPreference {
+        self.ui_font_preference
     }
 
     pub fn connection_manager(&self) -> &ConnectionManager {
@@ -23,10 +23,6 @@ impl Akt {
 
     pub fn query_workspace(&self) -> &QueryWorkspace {
         &self.query_workspace
-    }
-
-    pub fn query_editor(&self) -> &text_editor::Content {
-        &self.query_editor
     }
 
     pub fn query_running(&self) -> bool {
@@ -65,11 +61,6 @@ impl Akt {
         self.create_table_draft.as_ref()
     }
 
-    pub fn create_table_sql_preview(&self, draft: &CreateTableDraft) -> String {
-        let mut form = self.connection_manager.form().clone();
-        create_table_statement(&mut form, draft).unwrap_or_else(|error| error)
-    }
-
     pub fn rename_database_draft(&self) -> Option<&RenameDatabaseDraft> {
         self.rename_database_draft.as_ref()
     }
@@ -90,21 +81,12 @@ impl Akt {
         self.selected_alter_table_column
     }
 
-    pub fn alter_table_sql_preview(&self, draft: &AlterTableDraft) -> String {
-        let mut form = self.connection_manager.form().clone();
-        alter_table_statement(&mut form, draft).unwrap_or_else(|error| error)
-    }
-
     pub fn create_table_tab(&self) -> CreateTableTab {
         self.create_table_tab
     }
 
     pub fn alter_table_tab(&self) -> AlterTableTab {
         self.alter_table_tab
-    }
-
-    pub fn table_rows_page(&self) -> Option<&TableRowsPage> {
-        self.table_rows_page.as_ref()
     }
 
     pub fn table_detail_target(&self) -> Option<&str> {
@@ -139,10 +121,6 @@ impl Akt {
         self.schema_object_menu == Some(index)
     }
 
-    pub fn result_focus(&self) -> bool {
-        self.result_focus
-    }
-
     pub fn database_workspace_active(&self) -> bool {
         self.database_workspace_active
     }
@@ -157,14 +135,6 @@ impl Akt {
 
     pub fn memory_label(&self) -> &str {
         &self.memory_label
-    }
-
-    pub fn result_order_by(&self) -> &[ResultSortKey] {
-        if let Some(page) = self.table_rows_page.as_ref() {
-            page.order_by()
-        } else {
-            &self.query_result_order_by
-        }
     }
 
     pub fn status_message(&self) -> &str {

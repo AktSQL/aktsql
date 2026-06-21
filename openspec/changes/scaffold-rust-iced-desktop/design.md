@@ -1,85 +1,85 @@
-## Context
+## 上下文
 
-The repository currently contains product notes, OpenSpec configuration, prototype assets, and requirement slicing documentation, but no application source code. The first implementation decision is now explicit: Akt will start as a Rust desktop application using iced.
+仓库目前包含产品说明、OpenSpec 配置、原型资产和需求切片文档，但还没有应用源码。第一个实现决策已经明确：Akt 将从使用 iced 的 Rust 桌面应用开始。
 
-The scaffold must establish a stable base without prematurely implementing all database-management features. The app should visibly match the Akt workbench direction: top navigation, left database/navigation rail, central workspace, and bottom status bar.
+该脚手架必须建立稳定基础，但不提前实现所有数据库管理功能。应用在视觉上应符合 Akt 工作台方向：顶部导航、左侧数据库/导航栏、中央工作区和底部状态栏。
 
-## Goals / Non-Goals
+## 目标 / 非目标
 
-**Goals:**
+**目标：**
 
-- Create a Rust workspace with a desktop app crate.
-- Use iced for the native desktop UI.
-- Implement a first visible desktop shell aligned with the prototype.
-- Keep module boundaries small and explicit.
-- Add basic theme support for dark and light modes.
-- Add commands for running, formatting, and checking the app.
+- 创建包含桌面应用 crate 的 Rust workspace。
+- 使用 iced 构建原生桌面 UI。
+- 实现与原型一致的首个可见桌面主壳。
+- 保持模块边界小而明确。
+- 添加暗色和亮色模式的基础主题支持。
+- 添加运行、格式化和检查应用的命令。
 
-**Non-Goals:**
+**非目标：**
 
-- No real database connections in this change.
-- No table designer, query execution, SQL formatting, i18n, or ER diagram generation yet.
-- No secure credential storage yet.
-- No plugin or extension system yet.
+- 本次变更不实现真实数据库连接。
+- 暂不实现表设计器、查询执行、SQL 格式化、i18n 或 ER 图生成。
+- 暂不实现安全凭据存储。
+- 暂不实现插件或扩展系统。
 
-## Decisions
+## 决策
 
-### Rust workspace with one app crate
+### 使用一个应用 crate 的 Rust 工作区
 
-Use a Cargo workspace with `crates/aktsql_app` as the first member.
+使用 Cargo 工作区，并将 `crates/aktsql_app` 作为第一个成员。
 
-Rationale: this keeps the repository ready for future crates such as `aktsql_core`, `aktsql_drivers`, or `aktsql_sql`, while avoiding extra abstraction before there is real code.
+理由：这让仓库为未来的 `aktsql_core`、`aktsql_drivers` 或 `aktsql_sql` 等 crate 做好准备，同时避免在真实代码出现前引入额外抽象。
 
-Alternative considered: a single root crate. That is simpler today, but it makes later separation of UI/core/driver logic more disruptive.
+考虑过的替代方案：单个根 crate。它现在更简单，但后续拆分 UI/core/driver 逻辑时扰动更大。
 
-### iced for the desktop UI
+### 桌面 UI 使用 iced
 
-Use iced as the first UI dependency.
+使用 iced 作为第一个 UI 依赖。
 
-Rationale: the user explicitly selected Rust iced. iced also fits a message-driven architecture, which keeps state updates explicit and testable.
+理由：用户已明确选择 Rust iced。iced 也适合消息驱动架构，可让状态更新保持显式且可测试。
 
-Alternative considered: Tauri or egui. Tauri adds a web stack, and egui has a different immediate-mode model. Both can work, but they do not match the requested stack.
+考虑过的替代方案：Tauri 或 egui。Tauri 会引入 Web 技术栈，egui 是不同的即时模式模型。二者都可行，但不符合已请求的技术栈。
 
-### Message-driven app shell
+### 消息驱动应用主壳
 
-Keep initial state and events in an `App` type with a `Message` enum. UI functions render from immutable state and emit messages.
+将初始状态和事件保存在带 `Message` enum 的 `App` 类型中。UI 函数从不可变状态渲染，并发出消息。
 
-Rationale: this makes state transitions clear and keeps future behavior such as theme toggling, navigation, and refresh actions predictable.
+理由：这能让状态转换清晰，并让主题切换、导航、刷新等后续行为保持可预测。
 
-### Module boundaries
+### 模块边界
 
-Initial modules:
+初始模块：
 
-- `app`: application state, messages, update flow.
-- `ui`: visual layout and widgets.
-- `theme`: Akt palette and theme selection.
+- `app`：应用状态、消息和 update 流程。
+- `ui`：视觉布局和 widget。
+- `theme`：Akt 色板和主题选择。
 
-Future modules should stay narrow:
+未来模块应保持职责收敛：
 
-- `connection`: saved connection metadata and validation.
-- `drivers`: database-specific access behind traits.
-- `metadata`: object tree and schema introspection.
-- `query`: query execution state.
-- `sql`: formatting, dialect metadata, and completion.
+- `connection`：已保存连接的元数据与校验。
+- `drivers`：trait 后的数据库专属访问。
+- `metadata`：对象树和 schema introspection。
+- `query`：查询执行状态。
+- `sql`：格式化、方言元数据和补全。
 
-## Risks / Trade-offs
+## 风险 / 取舍
 
-- iced APIs may differ by version -> Pin a current version and keep wrapper functions local to `ui`.
-- First scaffold has placeholders, not real DB behavior -> Label placeholder areas clearly in code and docs, and keep future tasks explicit.
-- Native GUI dependencies may need system libraries -> Document verification commands and surface any build failures directly.
-- Theme styling can sprawl -> Centralize palette values in `theme`.
+- iced API 可能随版本变化 -> 固定当前版本，并将包装函数保留在 `ui` 内。
+- 首个脚手架只有占位，没有真实数据库行为 -> 在代码和文档中清楚标注占位区域，并明确后续任务。
+- 原生 GUI 依赖可能需要系统库 -> 记录验证命令，并直接暴露构建失败。
+- 主题样式可能扩散 -> 将色板值集中到 `theme`。
 
-## Migration Plan
+## 迁移计划
 
-1. Add Cargo workspace files and `crates/aktsql_app`.
-2. Add iced app shell source modules.
-3. Update repository docs with Rust/iced commands.
-4. Run formatting and compile checks.
+1. 添加 Cargo workspace 文件和 `crates/aktsql_app`。
+2. 添加 iced 应用主壳源码模块。
+3. 更新仓库文档，加入 Rust/iced 命令。
+4. 运行格式化和编译检查。
 
-Rollback is straightforward at this stage: remove the new Cargo workspace files and app crate.
+当前阶段回滚很直接：移除新增的 Cargo workspace 文件和应用 crate。
 
-## Open Questions
+## 待确认问题
 
-- Whether the final distribution format will be raw binaries, platform installers, or a package manager target.
-- Whether database drivers will live in the same workspace or separate optional crates.
-- Whether SQL editor functionality will use iced-native widgets only or integrate a specialized editor component later.
+- 最终分发格式是原始二进制、平台安装包，还是包管理器目标。
+- 数据库驱动放在同一个 workspace，还是拆为独立可选 crate。
+- SQL 编辑器功能只使用 iced 原生 widget，还是后续集成专用编辑器组件。
