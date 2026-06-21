@@ -1,0 +1,22 @@
+# Tasks
+
+- [x] 1.1 Document the object-tree workbench navigation model.
+- [x] 1.2 Update product requirements so create database no longer uses SQL preview as the primary path.
+- [x] 1.3 Replace the flat left sidebar with an object tree and bottom tool section.
+- [x] 1.4 Add database/table tree node expansion and right-click action menus.
+- [x] 1.5 Keep the full database tree visible while expanding the selected database's tables.
+- [x] 1.6 Make database left-click toggle expand/collapse while explicit connection databases open as table lists.
+- [x] 2.1 Add a create database form with required and driver-specific optional parameters.
+- [x] 2.2 Execute create database directly for supported drivers without changing the query editor.
+- [x] 2.3 Keep unsupported native-driver targets explicit instead of generating preview SQL.
+- [x] 2.4 Add database-node actions for create table, read-only details, rename dialog, and charset dialog.
+- [x] 2.5 Add driver-mapped database and table rename workflows.
+- [x] 2.6 Load live database details into the right workbench with driver-specific grouped metadata.
+- [x] 2.7 Execute table row browsing directly with 100-row pagination.
+- [x] 2.8 Load read-only table structure details without routing through SQL preview.
+- [x] 2.9 Add direct alter-table form actions for rename column, add column, add index, and supported column movement.
+- [x] 3.1 Add basic direct create table dialog without SQL preview.
+- [x] 3.5 Expand create table designer with multi-column grid, indexes, constraints, and engine options.
+- [x] 3.2 Add confirmation dialogs for drop table and drop database.
+- [ ] 3.3 Add confirmation dialogs for Truncate Table.
+- [ ] 3.4 Add mutation history/log details for executed schema changes.

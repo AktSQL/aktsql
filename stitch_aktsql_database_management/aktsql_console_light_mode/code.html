@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Akt | Query Console</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+            font-size: 20px;
+        }
+        /* Custom Scrollbar for High Density */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #d1d1d1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #b1b1b1; }
+        
+        .sql-editor-container {
+            background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container": "#f3f4f4",
+                      "error-container": "#f9dad6",
+                      "primary-fixed-dim": "#ffb4a8",
+                      "surface-variant": "#e1e2e2",
+                      "error": "#ba1a1a",
+                      "outline-variant": "#d8c2be",
+                      "on-tertiary-fixed": "#1c1b1b",
+                      "primary-container": "#e60000",
+                      "inverse-on-surface": "#f2f0f0",
+                      "primary-fixed": "#ffdad4",
+                      "on-primary": "#ffffff",
+                      "surface-container-highest": "#e1e2e2",
+                      "secondary": "#5d5e5e",
+                      "surface-container-high": "#e7e8e8",
+                      "surface-container-lowest": "#ffffff",
+                      "tertiary-container": "#f1f0f0",
+                      "surface-bright": "#f9f9f9",
+                      "primary": "#e60000",
+                      "secondary-fixed-dim": "#c9c6c5",
+                      "on-primary-fixed": "#410000",
+                      "surface": "#f9f9f9",
+                      "on-secondary-fixed": "#1c1b1b",
+                      "on-error-container": "#410002",
+                      "tertiary-fixed": "#e5e2e1",
+                      "on-primary-fixed-variant": "#930100",
+                      "on-tertiary-fixed-variant": "#474746",
+                      "inverse-surface": "#303031",
+                      "outline": "#857371",
+                      "tertiary-fixed-dim": "#c8c6c5",
+                      "background": "#ffffff",
+                      "on-tertiary-container": "#1d1c1c",
+                      "on-tertiary": "#ffffff",
+                      "on-secondary-container": "#444747",
+                      "tertiary": "#5d5e5d",
+                      "on-secondary": "#ffffff",
+                      "on-surface": "#1b1c1c",
+                      "on-error": "#ffffff",
+                      "secondary-fixed": "#e5e2e1",
+                      "surface-container-low": "#f3f4f4",
+                      "on-secondary-fixed-variant": "#474646",
+                      "on-background": "#1b1c1c",
+                      "surface-dim": "#dedada",
+                      "secondary-container": "#e1e2e2",
+                      "on-surface-variant": "#534341",
+                      "on-primary-container": "#ffffff",
+                      "inverse-primary": "#ffb4a8",
+                      "surface-tint": "#e60000"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0rem",
+                      "lg": "0.125rem",
+                      "xl": "0.25rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "container-padding": "16px",
+                      "density-comfortable": "12px",
+                      "density-compact": "4px",
+                      "gutter": "12px",
+                      "unit": "4px"
+              },
+              "fontFamily": {
+                      "label-sm": ["JetBrains Mono"],
+                      "body-md": ["Inter"],
+                      "headline-md": ["Inter"],
+                      "code-md": ["JetBrains Mono"],
+                      "headline-lg": ["Inter"]
+              },
+              "fontSize": {
+                      "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "code-md": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                      "headline-lg": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+              }
+            },
+          },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md text-body-md overflow-hidden h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-4 h-12 z-40 bg-surface-container-low border-b border-outline-variant">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-3">
+<img alt="Akt Logo" class="h-8 w-8 object-contain" src="data:image/png;base64,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d/v55r2tddiU1eDBg9v1ofrFF2XFvvvK0mHDnHWJjq45tFtAhhKYmJRdc40sHjxYSo8/Xmo//rjdkvLy8pw73+fNmycjRoxoNz0JIBBmAghImFvPB9/tl/W0adOctY7CwsKEHtR+8YUsHzlSlo8aJVVPPpkwbaAja2qk4s47nUV4W9Cv+e9/23V3/fXXlye1znYVmq2VtHtC7iSgphEigIBEqDEzXRW7qsoeZjh27NiERcUrKpyrppYOGSLVL72UMG2oInVRv/Lhh2XZL38py0ePFhtZtee/3QfzxhtviD22pb20xEMgbAQQkLC1mE/+brLJJs78vl1tlcgFW3xeosJh920kShf2uOrnnnNGVqVHHCH1y5YlrM6GG27osButopMwIZEQCBkBBCRkDeaHu/YE3Bd1HcOmZbzKr1+9WlYccICz+Gz3Y3ili5q94r77nKmtin/9K2HVevToIQ/r6OXkk09OmI5ICISJAAISptbywVd7htVTTz2V8Ga5mvfek2Vbby1V//mPDx76X6SNQEoPP1xWjBkjdQsXejpkV6pde+21cuONN4ottnsmJAICISGAgISkofxw87jjjnOeYZVosdzuDjfxqPvqKz9cDFSZdvf70s02k/Lbb0/o1/jx4+Wxxx5r8S6ThCcQGRACuNGaAALSmgjHDoEDDzzQeaS5c+DyX1wXlFeeeqrY86lconPWFNepvJUnnih2tVa8utqTwx577CFPP/202NSWZyIiIBBwAghIwBvID/f23HNPueeeeyQWi7kWH6+pkZKDDpLyW291jccozgMgl+++e8IFdnsHiT0y3p5aDDMIhJEAAhLGVsugz9ttt508+OCDni9SchbL99pLqnQKpoNu5Fxyu19kqfKs/eQTz7rvvPPOMn36dNZEPAkREWQCCEiQWyfLvtm9CjY3X1RU5FqyPS13+W67ReveDteaps9Y/+23smzHHaXqmWc8M7X3pNzKaM6TDxHBJYCABLdtsupZ9+7d5ZFHHpE+ffq4lmsjj+U6b2/v53BNgNGTQHzVKlmxzz5SrtOCXomOOOII5+5+r3jsEEiJQIZORkAyBDZs2U6dOlXshjc3v+OVlU4HWPvhh27R2JIhUF8vK485RsrvuMMztT1fzN4z4pmACAgEjAACErAG8cOdCRMmyL777utadLyuzrlBsOb1113jMXaMgF2hVZlg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"/>
+<span class="font-headline-md text-headline-md font-bold text-primary tracking-tighter">Akt</span>
+</div>
+<nav class="hidden md:flex gap-6 items-center">
+<a class="text-primary border-b-2 border-primary pb-1 font-label-sm text-label-sm" href="#">Editor</a>
+<a class="text-on-surface-variant hover:text-primary transition-opacity font-label-sm text-label-sm" href="#">Data</a>
+<a class="text-on-surface-variant hover:text-primary transition-opacity font-label-sm text-label-sm" href="#">Schema</a>
+<a class="text-on-surface-variant hover:text-primary transition-opacity font-label-sm text-label-sm" href="#">Console</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center bg-surface-container-highest px-3 py-1 rounded-sm gap-2">
+<span class="material-symbols-outlined text-secondary scale-75">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-label-sm font-label-sm w-48 placeholder-secondary" placeholder="Search objects..." type="text"/>
+</div>
+<div class="flex items-center gap-2 border-l border-outline-variant pl-4">
+<button class="p-1 hover:text-primary transition-opacity duration-75 active:scale-95">
+<span class="material-symbols-outlined">refresh</span>
+</button>
+<button class="p-1 hover:text-primary transition-opacity duration-75 active:scale-95">
+<span class="material-symbols-outlined">filter_alt</span>
+</button>
+<button class="bg-primary text-on-primary px-4 py-1 font-label-sm text-label-sm uppercase font-bold active:scale-95 transition-all">Execute</button>
+<button class="border border-outline px-4 py-1 font-label-sm text-label-sm uppercase font-medium hover:bg-surface-variant transition-all">Commit</button>
+</div>
+<div class="ml-2 w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center overflow-hidden border border-outline-variant">
+<img alt="Administrator" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAW7qFCgFmu4aJr0E-_KQQSXCGVvX50feMsvgGNiPk8TWUmawsEOWjx8nf0jpnHziqaG9pufOOcuJZdBrHF7IQ__D4U3AHr9ioHQsMBbMxY18AiPHBzNberNH8VqygBO2ktZBZAQxSC6KYIRzAruAe8jLkhpEppULY5NSeqe3h5lB1-6wGQa8KfkqJNPejzqd7MIbscgPGHA4CePUtg_KCCZMIzf4ydaZggBSxwpUXiYI94Ha30bWAduBw2SfBCaV4SbQjA2lVuXA"/>
+</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- SideNavBar / Rail -->
+<aside class="flex flex-col h-full w-[240px] z-50 bg-surface border-r border-outline-variant">
+<div class="p-4 border-b border-outline-variant bg-surface-container-low">
+<div class="flex items-center justify-between mb-4">
+<div>
+<h2 class="font-headline-md text-headline-md text-primary uppercase tracking-tighter text-sm">Akt_ROOT</h2>
+<p class="text-[10px] font-code-md text-secondary">CONNECTED:PROD-01</p>
+</div>
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+</div>
+<button class="w-full bg-surface-variant text-on-surface py-2 text-xs font-bold uppercase tracking-widest border border-outline-variant hover:bg-primary hover:text-on-primary transition-colors">
+                    New Connection
+                </button>
+</div>
+<nav class="flex-1 overflow-y-auto py-2">
+<div class="px-4 py-2 text-[10px] uppercase font-bold text-secondary tracking-widest">Main</div>
+<div class="text-primary border-l-4 border-primary bg-surface-container-high px-4 py-3 cursor-pointer active:bg-primary-container active:text-on-primary-container flex items-center gap-3">
+<span class="material-symbols-outlined">database</span>
+<span class="font-body-md">Databases</span>
+</div>
+<div class="text-secondary hover:text-on-surface px-4 py-3 cursor-pointer hover:bg-surface-variant transition-colors flex items-center gap-3">
+<span class="material-symbols-outlined">terminal</span>
+<span class="font-body-md">Query Explorer</span>
+</div>
+<div class="text-secondary hover:text-on-surface px-4 py-3 cursor-pointer hover:bg-surface-variant transition-colors flex items-center gap-3">
+<span class="material-symbols-outlined">table_chart</span>
+<span class="font-body-md">Tables</span>
+</div>
+<div class="text-secondary hover:text-on-surface px-4 py-3 cursor-pointer hover:bg-surface-variant transition-colors flex items-center gap-3">
+<span class="material-symbols-outlined">functions</span>
+<span class="font-body-md">Functions</span>
+</div>
+<div class="text-secondary hover:text-on-surface px-4 py-3 cursor-pointer hover:bg-surface-variant transition-colors flex items-center gap-3">
+<span class="material-symbols-outlined">history</span>
+<span class="font-body-md">History</span>
+</div>
+<div class="mt-6 px-4 py-2 text-[10px] uppercase font-bold text-secondary tracking-widest">Database Tree</div>
+<div class="px-4 py-1 space-y-1">
+<details class="group" open="">
+<summary class="flex items-center gap-2 cursor-pointer text-xs font-code-md text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined !text-[14px]">arrow_right</span>
+<span>production_cluster</span>
+</summary>
+<div class="ml-4 border-l border-outline-variant pl-2 mt-1 space-y-1">
+<div class="flex items-center gap-2 text-[11px] font-code-md py-1 text-secondary hover:text-primary cursor-pointer">
+<span class="material-symbols-outlined !text-[12px]">table_rows</span> users_v2
+                            </div>
+<div class="flex items-center gap-2 text-[11px] font-code-md py-1 text-secondary hover:text-primary cursor-pointer">
+<span class="material-symbols-outlined !text-[12px]">table_rows</span> transactions_log
+                            </div>
+<div class="flex items-center gap-2 text-[11px] font-code-md py-1 text-secondary hover:text-primary cursor-pointer">
+<span class="material-symbols-outlined !text-[12px]">table_rows</span> auth_tokens
+                            </div>
+</div>
+</details>
+<details class="group">
+<summary class="flex items-center gap-2 cursor-pointer text-xs font-code-md text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined !text-[14px]">arrow_right</span>
+<span>analytics_v4</span>
+</summary>
+</details>
+</div>
+</nav>
+<div class="p-2 border-t border-outline-variant bg-surface-container-lowest">
+<div class="text-secondary hover:text-on-surface px-2 py-2 cursor-pointer hover:bg-surface-variant transition-colors flex items-center gap-3 text-sm">
+<span class="material-symbols-outlined !text-lg">settings</span>
+<span>Settings</span>
+</div>
+<div class="text-secondary hover:text-on-surface px-2 py-2 cursor-pointer hover:bg-surface-variant transition-colors flex items-center gap-3 text-sm">
+<span class="material-symbols-outlined !text-lg">help</span>
+<span>Support</span>
+</div>
+</div>
+</aside>
+<!-- Main Workspace -->
+<main class="flex-1 flex flex-col bg-background overflow-hidden">
+<!-- Tabs / Editor Header -->
+<div class="h-10 bg-surface-container flex items-center border-b border-outline-variant px-2 overflow-x-auto gap-1">
+<div class="bg-background border-t-2 border-primary px-4 h-full flex items-center gap-2 text-xs font-code-md border-x border-outline-variant">
+<span class="material-symbols-outlined !text-sm text-primary">terminal</span>
+<span>query_main.sql</span>
+<span class="material-symbols-outlined !text-xs hover:text-primary cursor-pointer">close</span>
+</div>
+<div class="hover:bg-surface-variant px-4 h-full flex items-center gap-2 text-xs font-code-md text-secondary cursor-pointer">
+<span class="material-symbols-outlined !text-sm">terminal</span>
+<span>check_indices.sql</span>
+<span class="material-symbols-outlined !text-xs hover:text-primary">close</span>
+</div>
+<button class="p-1 hover:bg-surface-variant text-secondary">
+<span class="material-symbols-outlined !text-sm">add</span>
+</button>
+</div>
+<!-- Editor Section -->
+<div class="flex-1 relative sql-editor-container flex flex-col">
+<div class="absolute left-0 top-0 w-10 h-full bg-surface-container-low border-r border-outline-variant flex flex-col items-center py-4 text-[10px] font-code-md text-secondary select-none">
+<span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+</div>
+<div class="flex-1 p-4 ml-10 font-code-md text-code-md leading-relaxed outline-none overflow-y-auto whitespace-pre-wrap" contenteditable="true" spellcheck="false"><span class="text-primary font-bold">SELECT</span> * <span class="text-primary font-bold">FROM</span> users_v2 
+<span class="text-primary font-bold">WHERE</span> status = <span class="text-secondary">'active'</span>
+<span class="text-primary font-bold">AND</span> last_login &gt; <span class="text-secondary">'2023-10-01'</span>
+<span class="text-primary font-bold">ORDER BY</span> created_at <span class="text-primary font-bold">DESC</span>
+<span class="text-primary font-bold">LIMIT</span> <span class="text-error">100</span>;</div>
+<!-- Resize Handle -->
+<div class="h-1 bg-outline-variant cursor-ns-resize hover:bg-primary transition-colors"></div>
+<!-- Results Grid -->
+<div class="h-[40%] bg-surface flex flex-col border-t border-outline-variant">
+<div class="h-8 bg-surface-container flex items-center justify-between px-4 border-b border-outline-variant">
+<div class="flex items-center gap-4 text-[10px] font-bold uppercase tracking-wider text-secondary">
+<span class="text-primary">Results</span>
+<span class="hover:text-on-surface cursor-pointer">Messages</span>
+<span class="hover:text-on-surface cursor-pointer">Execution Plan</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-[10px] font-code-md text-secondary">Showing 1-25 of 25,000 rows</span>
+<button class="material-symbols-outlined !text-sm text-secondary hover:text-primary">download</button>
+<button class="material-symbols-outlined !text-sm text-secondary hover:text-primary">fullscreen</button>
+</div>
+</div>
+<div class="flex-1 overflow-auto">
+<table class="w-full text-xs font-code-md border-collapse">
+<thead class="sticky top-0 bg-surface-container-high shadow-sm">
+<tr>
+<th class="border-b border-r border-outline-variant p-2 text-left text-secondary font-bold uppercase">id</th>
+<th class="border-b border-r border-outline-variant p-2 text-left text-secondary font-bold uppercase">username</th>
+<th class="border-b border-r border-outline-variant p-2 text-left text-secondary font-bold uppercase">email</th>
+<th class="border-b border-r border-outline-variant p-2 text-left text-secondary font-bold uppercase">status</th>
+<th class="border-b border-r border-outline-variant p-2 text-left text-secondary font-bold uppercase">last_login</th>
+<th class="border-b border-outline-variant p-2 text-left text-secondary font-bold uppercase">region</th>
+</tr>
+</thead>
+<tbody>
+<tr class="bg-surface hover:bg-surface-container-lowest border-b border-outline-variant/30">
+<td class="p-2 border-r border-outline-variant/30 text-primary">#7A12</td>
+<td class="p-2 border-r border-outline-variant/30 font-medium">itachi_u</td>
+<td class="p-2 border-r border-outline-variant/30 text-secondary">itachi@aktsql.db</td>
+<td class="p-2 border-r border-outline-variant/30">
+<span class="px-2 py-0.5 bg-primary/10 text-primary rounded-full text-[9px] font-bold uppercase">Active</span>
+</td>
+<td class="p-2 border-r border-outline-variant/30">2023-11-20 14:30</td>
+<td class="p-2">JP-EAST-1</td>
+</tr>
+<tr class="bg-surface-container-low hover:bg-surface-container-lowest border-b border-outline-variant/30">
+<td class="p-2 border-r border-outline-variant/30 text-primary">#8F44</td>
+<td class="p-2 border-r border-outline-variant/30 font-medium">kisame_m</td>
+<td class="p-2 border-r border-outline-variant/30 text-secondary">same@aktsql.db</td>
+<td class="p-2 border-r border-outline-variant/30">
+<span class="px-2 py-0.5 bg-primary/10 text-primary rounded-full text-[9px] font-bold uppercase">Active</span>
+</td>
+<td class="p-2 border-r border-outline-variant/30">2023-11-20 12:15</td>
+<td class="p-2">JP-WEST-2</td>
+</tr>
+<tr class="bg-surface hover:bg-surface-container-lowest border-b border-outline-variant/30">
+<td class="p-2 border-r border-outline-variant/30 text-primary">#3C91</td>
+<td class="p-2 border-r border-outline-variant/30 font-medium">pain_leader</td>
+<td class="p-2 border-r border-outline-variant/30 text-secondary">nagato@aktsql.db</td>
+<td class="p-2 border-r border-outline-variant/30">
+<span class="px-2 py-0.5 bg-secondary/10 text-secondary rounded-full text-[9px] font-bold uppercase">Offline</span>
+</td>
+<td class="p-2 border-r border-outline-variant/30">2023-11-19 23:59</td>
+<td class="p-2">AM-NORTH-1</td>
+</tr>
+<tr class="bg-surface-container-low hover:bg-surface-container-lowest border-b border-outline-variant/30">
+<td class="p-2 border-r border-outline-variant/30 text-primary">#9B22</td>
+<td class="p-2 border-r border-outline-variant/30 font-medium">konan_p</td>
+<td class="p-2 border-r border-outline-variant/30 text-secondary">konan@aktsql.db</td>
+<td class="p-2 border-r border-outline-variant/30">
+<span class="px-2 py-0.5 bg-primary/10 text-primary rounded-full text-[9px] font-bold uppercase">Active</span>
+</td>
+<td class="p-2 border-r border-outline-variant/30">2023-11-20 09:45</td>
+<td class="p-2">AM-NORTH-1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+<footer class="fixed bottom-0 left-0 w-full flex justify-between items-center px-4 py-1 z-50 bg-surface-container-lowest border-t border-outline-variant h-6">
+<div class="flex items-center gap-4">
+<span class="font-label-sm text-label-sm font-bold text-secondary">Akt v1.0.4-stable</span>
+<div class="flex items-center gap-4 text-secondary text-[10px] font-code-md">
+<span class="flex items-center gap-1 hover:text-primary transition-colors cursor-pointer"><span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span> System Logs</span>
+<span class="flex items-center gap-1">Memory: 412MB</span>
+<span class="flex items-center gap-1">Rows: 25k</span>
+</div>
+</div>
+<div class="flex items-center gap-4 text-secondary text-[10px] font-code-md uppercase">
+<span class="flex items-center gap-1">Latency: <span class="text-primary font-bold">4ms</span></span>
+<span class="flex items-center gap-1">Encrypted: AES-256</span>
+<span class="flex items-center gap-1 text-primary">UTC 14:32:01</span>
+</div>
+</footer>
+<!-- Interactive Layer: Tooltip / Toast simulator -->
+<div class="fixed bottom-10 right-4 translate-y-20 opacity-0 transition-all duration-300 ease-out bg-surface-container-highest border-l-4 border-primary p-3 shadow-xl z-50 flex items-center gap-3" id="status-toast">
+<span class="material-symbols-outlined text-primary">check_circle</span>
+<div>
+<p class="font-bold text-xs uppercase">Query Executed</p>
+<p class="text-[10px] text-secondary">Returned 1,240 rows in 12ms</p>
+</div>
+</div>
+<script>
+        // Micro-interaction for Execute button
+        const executeBtn = document.querySelector('button.bg-primary');
+        const toast = document.getElementById('status-toast');
+        
+        executeBtn.addEventListener('click', () => {
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        });
+
+        // Simple Tab Switch Simulation
+        const navItems = document.querySelectorAll('aside nav > div[class*="cursor-pointer"]');
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                navItems.forEach(i => {
+                    i.classList.remove('text-primary', 'border-l-4', 'border-primary', 'bg-surface-container-high');
+                    i.classList.add('text-secondary');
+                });
+                item.classList.add('text-primary', 'border-l-4', 'border-primary', 'bg-surface-container-high');
+                item.classList.remove('text-secondary');
+            });
+        });
+    </script>
+</body></html>
