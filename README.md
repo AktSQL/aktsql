@@ -52,5 +52,6 @@ npm run docs:dev
 ```
 
 发布：
-- 官网由 GitHub Actions 构建后推送到 `gh-pages` 分支，Cloudflare Pages 连接该分支。
-- 桌面版本在推送 `v*` tag 后构建 Windows `.exe/.msi`、macOS `.app/.dmg`、Linux `.AppImage`。
+- 官网由 GitHub Actions 构建后推送到 `AktSQL/aktsql.github.io`，GitHub Pages 根域名为 `https://aktsql.github.io/`。
+- 同一份官网产物也部署到 Cloudflare Pages 项目 `aktsql`，默认域名为 `https://aktsql.pages.dev/`。
+- 桌面版本在推送 `v*` tag 后构建 Windows `.exe/.msi`、macOS `.dmg`、Linux `.AppImage`。
