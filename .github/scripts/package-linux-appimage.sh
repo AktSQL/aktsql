@@ -3,6 +3,9 @@ set -euo pipefail
 
 VERSION="${GITHUB_REF_NAME:-0.0.0}"
 VERSION="${VERSION#v}"
+if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+  VERSION="$(sed -n 's/^version = "\(.*\)"/\1/p' crates/aktsql_app/Cargo.toml | head -n 1)"
+fi
 ROOT="$(pwd)"
 APPDIR="$ROOT/dist/appimage/AktSQL.AppDir"
 ARTIFACT_DIR="$ROOT/dist/linux-artifacts"
@@ -37,4 +40,5 @@ if [ ! -f "$LINUXDEPLOY" ]; then
 fi
 
 ARCH=x86_64 "$LINUXDEPLOY" --appdir "$APPDIR" --output appimage
-mv "$ROOT"/AktSQL*.AppImage "$ARTIFACT_DIR/AktSQL-$VERSION-x86_64.AppImage"
+mv "$ROOT"/AktSQL*.AppImage "$ARTIFACT_DIR/AktSQL-linux-x86_64.AppImage"
+cp "$ARTIFACT_DIR/AktSQL-linux-x86_64.AppImage" "$ARTIFACT_DIR/AktSQL-$VERSION-linux-x86_64.AppImage"

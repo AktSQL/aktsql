@@ -5,70 +5,68 @@ title: AktSQL Database Management
 
 <section class="home-hero">
   <div class="hero-copy">
-    <div class="eyebrow">SQL GUI for focused database work</div>
+    <div class="eyebrow">专注数据库工作的 SQL GUI</div>
     <h1>AktSQL Database Management</h1>
     <p>
-      AktSQL is a desktop SQL GUI for connecting to databases, browsing schemas,
-      executing queries, editing table structures, and inspecting results without
-      hiding the underlying database model.
+      AktSQL 是面向桌面端的数据库管理工具，用于连接数据库、浏览对象树、
+      执行 SQL、查看结果集、编辑表结构，并保持操作逻辑贴近真实数据库模型。
     </p>
     <div class="hero-actions">
-      <a class="button-primary" href="/downloads.html">Download builds</a>
-      <a class="button-secondary" href="/guide/getting-started.html">Read guide</a>
+      <a class="button-primary" href="/downloads.html">下载安装包</a>
+      <a class="button-secondary" href="/guide/getting-started.html">阅读指南</a>
     </div>
   </div>
   <div class="hero-shot">
-    <img src="/screenshots/query-workspace-dark.png" alt="AktSQL query workspace in dark mode" />
+    <img src="/screenshots/query-workspace-dark.png" alt="AktSQL 深色查询工作台" />
   </div>
 </section>
 
 <section class="feature-grid">
   <div class="feature">
-    <h3>Connection first</h3>
-    <p>Manage MySQL, MariaDB, TiDB, PostgreSQL, CockroachDB, MongoDB, SQLite, SQL Server, and Oracle connection profiles.</p>
+    <h3>连接优先</h3>
+    <p>管理 MySQL、MariaDB、TiDB、PostgreSQL、CockroachDB、MongoDB、SQLite、SQL Server 和 Oracle 连接配置。</p>
   </div>
   <div class="feature">
-    <h3>Schema aware</h3>
-    <p>Browse databases, tables, columns, indexes, constraints, engine details, and metadata as first-class objects.</p>
+    <h3>结构清晰</h3>
+    <p>数据库、数据表、字段、索引、约束、引擎参数和元数据都以明确对象呈现。</p>
   </div>
   <div class="feature">
-    <h3>Direct operations</h3>
-    <p>Rename, drop, truncate, create, and alter database objects through focused forms instead of loose SQL previews.</p>
+    <h3>直接操作</h3>
+    <p>创建、重命名、修改、截断和删除对象通过专用表单完成，不把 GUI 操作退化成 SQL 预览。</p>
   </div>
   <div class="feature">
-    <h3>Result discipline</h3>
-    <p>Run queries, page result sets, sort through SQL-backed ordering, and keep table browsing predictable.</p>
+    <h3>结果可控</h3>
+    <p>查询、分页、排序和表数据浏览都以数据库执行结果为准，保持行为稳定可预期。</p>
   </div>
 </section>
 
-## Workbench
+## 工作台
 
 <div class="screenshot-panel">
-  <img src="/screenshots/query-workspace-light.png" alt="AktSQL light mode SQL GUI layout" />
+  <img src="/screenshots/query-workspace-light.png" alt="AktSQL 浅色 SQL GUI 布局" />
 </div>
 
-## Table Structure Editing
+## 表结构编辑
 
-AktSQL keeps table design close to the database model: columns, indexes,
-constraints, and generated DDL are separate tabs with direct operations.
+AktSQL 将字段、索引、约束和建表 SQL 分成独立标签页，结构操作直接、明确、可追溯。
 
 <div class="screenshot-panel">
-  <img src="/screenshots/schema-designer-context.png" alt="AktSQL table structure editor with column actions" />
+  <img src="/screenshots/schema-designer-context.png" alt="AktSQL 表结构编辑器字段操作" />
 </div>
 
-## Workflow
+## 使用流程
 
 <section class="workflow-grid">
   <div class="workflow-item">
-    <h3>1. Connect</h3>
-    <p>Create or select a connection profile, then enter the database workbench.</p>
+    <h3>1. 连接</h3>
+    <p>创建或选择连接配置，进入数据库工作台。</p>
   </div>
   <div class="workflow-item">
-    <h3>2. Inspect</h3>
-    <p>Expand databases and tables, inspect metadata, and open table data when needed.</p>
+    <h3>2. 查看</h3>
+    <p>展开数据库与数据表，查看元数据、表结构和表数据。</p>
   </div>
   <div class="workflow-item">
-    <h3>3. Change</h3>
-    <p>Apply schema changes through explicit forms and keep generated SQL copyable.</p>
+    <h3>3. 修改</h3>
+    <p>通过明确的表单和结构编辑器执行变更，需要审阅时保留可复制 SQL。</p>
   </div>
 </section>

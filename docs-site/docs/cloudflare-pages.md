@@ -1,16 +1,14 @@
 # Cloudflare Pages
 
-AktSQL publishes the official site as a Cloudflare Pages project. This creates a
-Cloudflare Pages domain such as:
+AktSQL 官方站点部署为 Cloudflare Pages 项目，默认域名为：
 
 ```text
 aktsql.pages.dev
 ```
 
-## Pages deployment
+## Pages 部署
 
-GitHub Actions builds VuePress, publishes the static output to `gh-pages` for a
-plain static artifact branch, then deploys the same output to Cloudflare Pages:
+GitHub Actions 会构建 VuePress，把静态产物同步到 `gh-pages` 分支，并部署同一份产物到 Cloudflare Pages：
 
 ```sh
 npx wrangler pages deploy docs/.vuepress/dist \
@@ -18,41 +16,36 @@ npx wrangler pages deploy docs/.vuepress/dist \
   --branch main
 ```
 
-The Pages project name is:
+Pages 项目名固定为：
 
 ```text
 aktsql
 ```
 
-Keep this project name unchanged so the default Pages domain remains
-`aktsql.pages.dev`.
+不要修改这个项目名，否则默认 Pages 域名就不再是 `aktsql.pages.dev`。
 
-Required GitHub secrets:
+需要配置的 GitHub Actions secrets：
 
 - `CLOUDFLARE_API_TOKEN`
 - `CLOUDFLARE_ACCOUNT_ID`
 
-After the first successful deployment, Cloudflare will show the project under
-**Workers & Pages -> Pages**, and the default domain will be available from the
-project overview.
+## 静态产物分支
 
-## Static artifact branch
-
-The `gh-pages` branch is an orphan branch containing only built static files:
+`gh-pages` 是 orphan 分支，只保存构建后的静态文件：
 
 - `index.html`
 - `assets/`
 - `screenshots/`
-- generated VuePress pages
+- VuePress 生成页面
 
-No Rust source code or application workspace files should live in `gh-pages`.
+Rust 源码、Cargo workspace、Node 依赖和开发文档不应该进入 `gh-pages`。
 
-## Alternative direct build
+## 直接构建备选方案
 
-Cloudflare Pages can also build from `main` directly:
+Cloudflare Pages 也可以直接从 `main` 构建：
 
 - Root directory: `docs-site`
 - Build command: `npm install && npm run docs:build`
 - Build output directory: `docs/.vuepress/dist`
 
-Use the branch-based mode for deterministic releases.
+当前仓库采用 GitHub Actions 统一构建并部署，以保证 `gh-pages` 和 Pages 站点产物一致。

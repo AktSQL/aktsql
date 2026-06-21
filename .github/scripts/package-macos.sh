@@ -3,6 +3,9 @@ set -euo pipefail
 
 VERSION="${GITHUB_REF_NAME:-0.0.0}"
 VERSION="${VERSION#v}"
+if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+  VERSION="$(sed -n 's/^version = "\(.*\)"/\1/p' crates/aktsql_app/Cargo.toml | head -n 1)"
+fi
 ROOT="$(pwd)"
 APP_DIR="$ROOT/dist/macos/AktSQL.app"
 ARTIFACT_DIR="$ROOT/dist/macos-artifacts"
@@ -40,10 +43,12 @@ cat > "$APP_DIR/Contents/Info.plist" <<PLIST
 </plist>
 PLIST
 
-tar -czf "$ARTIFACT_DIR/AktSQL-$VERSION-macos-app.tar.gz" -C "$ROOT/dist/macos" "AktSQL.app"
+tar -czf "$ARTIFACT_DIR/AktSQL-macos-app.tar.gz" -C "$ROOT/dist/macos" "AktSQL.app"
+cp "$ARTIFACT_DIR/AktSQL-macos-app.tar.gz" "$ARTIFACT_DIR/AktSQL-$VERSION-macos-app.tar.gz"
 hdiutil create \
   -volname "AktSQL" \
   -srcfolder "$APP_DIR" \
   -ov \
   -format UDZO \
-  "$ARTIFACT_DIR/AktSQL-$VERSION-macos.dmg"
+  "$ARTIFACT_DIR/AktSQL-macos.dmg"
+cp "$ARTIFACT_DIR/AktSQL-macos.dmg" "$ARTIFACT_DIR/AktSQL-$VERSION-macos.dmg"

@@ -84,6 +84,7 @@ jobs:
         with:
           name: windows
           path: dist/windows/*
+          if-no-files-found: error
 
   macos:
     name: macOS app and dmg
@@ -115,6 +116,7 @@ jobs:
         with:
           name: macos
           path: dist/macos-artifacts/*
+          if-no-files-found: error
 
   linux:
     name: Linux AppImage
@@ -155,6 +157,7 @@ jobs:
         with:
           name: linux
           path: dist/linux-artifacts/*
+          if-no-files-found: error
 
   publish:
     name: Publish GitHub Release
@@ -171,3 +174,4 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: release-artifacts/**/*
+          fail_on_unmatched_files: true
