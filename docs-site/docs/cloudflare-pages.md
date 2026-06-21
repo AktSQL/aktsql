@@ -24,6 +24,9 @@ The Pages project name is:
 aktsql
 ```
 
+Keep this project name unchanged so the default Pages domain remains
+`aktsql.pages.dev`.
+
 Required GitHub secrets:
 
 - `CLOUDFLARE_API_TOKEN`
