@@ -58,12 +58,12 @@ jobs:
           if npx wrangler pages project list --json | node -e '
             const input = require("fs").readFileSync(0, "utf8");
             const projects = JSON.parse(input);
-            const found = projects.some((project) => project.name === "aktsql-official-site");
+            const found = projects.some((project) => project.name === "aktsql");
             process.exit(found ? 0 : 1);
           '; then
-            echo "Cloudflare Pages project aktsql-official-site already exists."
+            echo "Cloudflare Pages project aktsql already exists."
           else
-            npx wrangler pages project create aktsql-official-site \
+            npx wrangler pages project create aktsql \
               --production-branch main
           fi
 
@@ -79,7 +79,7 @@ jobs:
           fi
 
           npx wrangler pages deploy docs/.vuepress/dist \
-            --project-name aktsql-official-site \
+            --project-name aktsql \
             --branch main \
             --commit-hash "$GITHUB_SHA" \
             --commit-message "Deploy AktSQL official site from $GITHUB_SHA"

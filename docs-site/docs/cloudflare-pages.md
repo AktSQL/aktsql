@@ -4,7 +4,7 @@ AktSQL publishes the official site as a Cloudflare Pages project. This creates a
 Cloudflare Pages domain such as:
 
 ```text
-aktsql-official-site.pages.dev
+aktsql.pages.dev
 ```
 
 ## Pages deployment
@@ -14,14 +14,14 @@ plain static artifact branch, then deploys the same output to Cloudflare Pages:
 
 ```sh
 npx wrangler pages deploy docs/.vuepress/dist \
-  --project-name aktsql-official-site \
+  --project-name aktsql \
   --branch main
 ```
 
 The Pages project name is:
 
 ```text
-aktsql-official-site
+aktsql
 ```
 
 Required GitHub secrets:

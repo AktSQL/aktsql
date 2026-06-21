@@ -1,5 +1,5 @@
 {
-  "name": "aktsql-official-site",
+  "name": "aktsql-site",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -7,7 +7,7 @@
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs",
     "docs:clean-dev": "vuepress dev docs --clean-cache",
-    "cf:deploy": "wrangler pages deploy docs/.vuepress/dist --project-name aktsql-official-site --branch main"
+    "cf:deploy": "wrangler pages deploy docs/.vuepress/dist --project-name aktsql --branch main"
   },
   "devDependencies": {
     "@vuepress/bundler-vite": "^2.0.0-rc.24",
