@@ -1,0 +1,9 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "aktsql-official-site",
+  "compatibility_date": "2026-06-21",
+  "assets": {
+    "directory": "./docs/.vuepress/dist",
+    "not_found_handling": "single-page-application"
+  }
+}

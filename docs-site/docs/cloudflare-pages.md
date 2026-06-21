@@ -1,21 +1,58 @@
-# Cloudflare Pages
+# Cloudflare Deployment
 
-The repository publishes the static site to a dedicated `gh-pages` branch.
-Cloudflare Pages should be connected to that branch.
+The repository keeps a dedicated `gh-pages` branch for static site artifacts and
+also uploads Cloudflare Worker versions with Wrangler.
 
-## Recommended Cloudflare settings
+## Wrangler versions
+
+GitHub Actions builds VuePress, publishes the static output to `gh-pages`, then
+runs:
+
+```sh
+npx wrangler versions upload \
+  --config wrangler.jsonc \
+  --tag docs-<git-sha> \
+  --message "Upload AktSQL official site"
+```
+
+Manual workflow runs can also deploy the uploaded version to all traffic:
+
+```sh
+npx wrangler versions deploy \
+  --config wrangler.jsonc \
+  --version-tag docs-<git-sha>@100% \
+  --yes
+```
+
+Required GitHub secrets:
+
+- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID`
+
+## Static artifact branch
+
+The `gh-pages` branch is an orphan branch containing only built static files:
+
+- `index.html`
+- `assets/`
+- `screenshots/`
+- generated VuePress pages
+
+No Rust source code or application workspace files should live in `gh-pages`.
+
+## Cloudflare Pages fallback
+
+If Cloudflare Pages is used instead of Workers versions, connect Pages to the
+`gh-pages` branch:
 
 - Production branch: `gh-pages`
 - Build command: leave empty
 - Build output directory: `/`
 - Root directory: leave empty
 
-The `gh-pages` branch contains already-built VuePress static files. This keeps
-Cloudflare Pages simple and makes GitHub Actions the single build point.
-
 ## Alternative direct build
 
-Cloudflare Pages can also build from `main` directly:
+Cloudflare can also build from `main` directly:
 
 - Root directory: `docs-site`
 - Build command: `npm install && npm run docs:build`
