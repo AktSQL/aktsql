@@ -38,6 +38,10 @@
             WorkingDirectory="INSTALLFOLDER"
             Advertise="yes" />
         </File>
+        <RemoveFolder
+          Id="RemoveApplicationProgramsFolder"
+          Directory="ApplicationProgramsFolder"
+          On="uninstall" />
       </Component>
     </ComponentGroup>
   </Fragment>
