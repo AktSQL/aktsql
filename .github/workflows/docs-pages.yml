@@ -44,28 +44,6 @@ jobs:
           publish_dir: docs-site/docs/.vuepress/dist
           force_orphan: true
 
-      - name: Ensure Cloudflare Pages project
-        working-directory: docs-site
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          : "${CLOUDFLARE_API_TOKEN:?Missing GitHub secret CLOUDFLARE_API_TOKEN}"
-          : "${CLOUDFLARE_ACCOUNT_ID:?Missing GitHub secret CLOUDFLARE_ACCOUNT_ID}"
-
-          if npx wrangler pages project list --json | node -e '
-            const input = require("fs").readFileSync(0, "utf8");
-            const payload = JSON.parse(input);
-            const projects = Array.isArray(payload) ? payload : payload.result || [];
-            const found = projects.some((project) => project.name === "aktsql");
-            process.exit(found ? 0 : 1);
-          '; then
-            echo "Cloudflare Pages project aktsql already exists."
-          else
-            npx wrangler pages project create aktsql \
-              --production-branch main
-          fi
-
       - name: Deploy Cloudflare Pages
         working-directory: docs-site
         env:
