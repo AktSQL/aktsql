@@ -13,7 +13,7 @@ if ([string]::IsNullOrWhiteSpace($version)) {
 }
 $version = $version.TrimStart("v")
 if ($version -notmatch '^\d+\.\d+\.\d+(\.\d+)?$') {
-    $manifest = Get-Content "crates\aktsql_app\Cargo.toml"
+    $manifest = Get-Content "crates\app\Cargo.toml"
     $versionLine = $manifest | Where-Object { $_ -match '^version\s*=' } | Select-Object -First 1
     $version = ($versionLine -replace 'version\s*=\s*"', '') -replace '"', ''
 }

@@ -1,0 +1,15 @@
+[package]
+name = "db"
+version = "0.0.1"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "AktSQL database drivers and metadata loading."
+
+[dependencies]
+engine.workspace = true
+mongodb.workspace = true
+mysql.workspace = true
+postgres.workspace = true
+rusqlite.workspace = true
+serde_json.workspace = true

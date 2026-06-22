@@ -4,7 +4,7 @@ set -euo pipefail
 VERSION="${GITHUB_REF_NAME:-0.0.0}"
 VERSION="${VERSION#v}"
 if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+ ]]; then
-  VERSION="$(sed -n 's/^version = "\(.*\)"/\1/p' crates/aktsql_app/Cargo.toml | head -n 1)"
+  VERSION="$(sed -n 's/^version = "\(.*\)"/\1/p' crates/app/Cargo.toml | head -n 1)"
 fi
 PACKAGE_ARCH="${1:-${AKTSQL_PACKAGE_ARCH:-$(uname -m)}}"
 case "$PACKAGE_ARCH" in
@@ -29,7 +29,7 @@ mkdir -p "$APP_DIR/Contents/MacOS" "$APP_DIR/Contents/Resources" "$ARTIFACT_DIR"
 
 cp "$BIN" "$APP_DIR/Contents/MacOS/aktsql"
 chmod +x "$APP_DIR/Contents/MacOS/aktsql"
-cp "$ROOT/crates/aktsql_app/assets/aktsql_logo.svg" "$APP_DIR/Contents/Resources/aktsql-logo.svg"
+cp "$ROOT/crates/ui/assets/aktsql_logo.svg" "$APP_DIR/Contents/Resources/aktsql-logo.svg"
 
 cat > "$APP_DIR/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>

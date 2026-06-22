@@ -4,7 +4,7 @@ set -euo pipefail
 VERSION="${GITHUB_REF_NAME:-0.0.0}"
 VERSION="${VERSION#v}"
 if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+ ]]; then
-  VERSION="$(sed -n 's/^version = "\(.*\)"/\1/p' crates/aktsql_app/Cargo.toml | head -n 1)"
+  VERSION="$(sed -n 's/^version = "\(.*\)"/\1/p' crates/app/Cargo.toml | head -n 1)"
 fi
 PACKAGE_ARCH="${1:-${AKTSQL_PACKAGE_ARCH:-$(uname -m)}}"
 case "$PACKAGE_ARCH" in
@@ -35,7 +35,7 @@ mkdir -p \
 cp "$ROOT/target/release/aktsql" "$APPDIR/usr/bin/aktsql"
 chmod +x "$APPDIR/usr/bin/aktsql"
 cp "$ROOT/packaging/linux/aktsql.desktop" "$APPDIR/usr/share/applications/aktsql.desktop"
-cp "$ROOT/crates/aktsql_app/assets/aktsql_logo.svg" "$APPDIR/usr/share/icons/hicolor/scalable/apps/aktsql.svg"
+cp "$ROOT/crates/ui/assets/aktsql_logo.svg" "$APPDIR/usr/share/icons/hicolor/scalable/apps/aktsql.svg"
 
 cat > "$APPDIR/AppRun" <<'APPRUN'
 #!/usr/bin/env bash

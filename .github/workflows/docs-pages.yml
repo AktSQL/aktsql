@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: docs-pages
@@ -35,15 +35,6 @@ jobs:
       - name: Build
         working-directory: docs-site
         run: npm run docs:build
-
-      - name: Publish GitHub Pages root site
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          personal_token: ${{ secrets.PAGES_DEPLOY_TOKEN }}
-          external_repository: AktSQL/aktsql.github.io
-          publish_branch: main
-          publish_dir: docs-site/docs/.vuepress/dist
-          force_orphan: true
 
       - name: Deploy Cloudflare Pages
         working-directory: docs-site

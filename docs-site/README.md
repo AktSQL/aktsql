@@ -14,14 +14,8 @@ npm run docs:dev
 npm run docs:build
 ```
 
-GitHub Actions 会将 `docs/.vuepress/dist` 发布到组织 Pages 仓库
-`AktSQL/aktsql.github.io`，因此 GitHub Pages 地址为：
-
-```text
-https://aktsql.github.io/
-```
-
-同一份静态产物也会部署到 Cloudflare Pages 项目 `aktsql`，访问地址为：
+GitHub Actions 会将 `docs/.vuepress/dist` 部署到 Cloudflare Pages 项目
+`aktsql`，访问地址为：
 
 ```text
 https://aktsql.pages.dev/

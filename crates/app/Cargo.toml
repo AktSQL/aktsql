@@ -1,0 +1,27 @@
+[package]
+name = "aktsql"
+version = "0.0.1"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "AktSQL Database Management desktop application."
+
+[[bin]]
+name = "aktsql"
+path = "src/main.rs"
+
+[dependencies]
+akt_ui.workspace = true
+db.workspace = true
+engine.workspace = true
+iced.workspace = true
+libc = "0.2"
+serde.workspace = true
+serde_json.workspace = true
+sql.workspace = true
+tokio.workspace = true
+windows-sys = { version = "0.59", features = [
+    "Win32_Foundation",
+    "Win32_System_ProcessStatus",
+    "Win32_System_Threading",
+] }

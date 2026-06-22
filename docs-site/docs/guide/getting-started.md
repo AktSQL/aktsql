@@ -20,7 +20,7 @@ cargo run -p aktsql
 快速检查编译：
 
 ```sh
-cargo check -p aktsql --all-targets
+cargo check --workspace --all-targets
 ```
 
 ## 基本流程

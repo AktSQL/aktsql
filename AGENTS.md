@@ -8,7 +8,7 @@
 当前仓库状态：
 - 仓库包含项目说明、OpenSpec 配置、Cursor 辅助资产、CodeGraph 元数据，以及初始 Rust 桌面应用脚手架。
 - 已提交的实现技术栈是 Rust，桌面 UI 使用 iced。
-- 第一个应用 crate 是 `crates/aktsql_app`，Cargo package 和二进制名称均为 `aktsql`。
+- Workspace 已拆分为多个 crate：`crates/app` 是 iced 桌面入口，Cargo package 和二进制名称仍为 `aktsql`；`crates/engine` 承载共享模型、消息和应用引擎类型；`crates/sql` 承载 SQL/DDL 生成；`crates/db` 承载数据库驱动与元数据读取；`crates/ui` 承载 iced 视图、主题和 i18n re-export。
 
 ## 2. 产品说明
 
@@ -29,7 +29,11 @@
 重要路径：
 - `README.md` - 当前产品说明。
 - `Cargo.toml` - Rust workspace 配置。
-- `crates/aktsql_app/` - 初始 iced 桌面应用。
+- `crates/app/` - iced 桌面入口、应用状态机和副作用编排。
+- `crates/engine/` - 连接配置、schema/query/workbench 领域模型、消息和导航枚举。
+- `crates/sql/` - SQL、DDL 与数据库命令生成。
+- `crates/db/` - 数据库连接测试、查询执行和元数据读取。
+- `crates/ui/` - iced 视图、主题样式与多语言文案 re-export。
 - `docs/product/aktsql-requirement-slices.md` - 从原型拆出的产品需求切片。
 - `openspec/config.yaml` - OpenSpec 配置。
 - `.cursor/commands/` 和 `.cursor/skills/` - Cursor 与 OpenSpec 辅助文件。
@@ -91,7 +95,7 @@
 
 ```sh
 cargo fmt --check
-cargo check
+cargo check --workspace --all-targets
 rg --files -uu
 ```
 

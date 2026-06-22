@@ -30,20 +30,21 @@ aktsql.config.json
 - iced desktop UI
 - `docs-site/` 中的 VuePress 官方站点
 
-运行：
+启动桌面应用：
 ```sh
 cargo run -p aktsql
 ```
 
 如果只想确认能否编译：
 ```sh
-cargo check
+cargo check --workspace --all-targets
 ```
 
 验证：
 ```sh
 cargo fmt --check
-cargo check
+cargo check --workspace --all-targets
+cargo test --workspace
 ```
 
 官网：
@@ -54,6 +55,5 @@ npm run docs:dev
 ```
 
 发布：
-- 官网由 GitHub Actions 构建后推送到 `AktSQL/aktsql.github.io`，GitHub Pages 根域名为 `https://aktsql.github.io/`。
-- 同一份官网产物也部署到 Cloudflare Pages 项目 `aktsql`，默认域名为 `https://aktsql.pages.dev/`。
+- 官网由 GitHub Actions 构建后部署到 Cloudflare Pages 项目 `aktsql`，默认域名为 `https://aktsql.pages.dev/`。
 - 桌面版本在推送 `v*` tag 后构建 Windows `.exe/.msi`、macOS `.dmg`、Linux `.AppImage`。

@@ -4,7 +4,8 @@ context: |
   项目：AktSQL Database Management，短名 Akt。
   产品类型：GUI 数据库管理工具，不是 CLI 优先的数据库工具。
   技术栈：Rust workspace，iced 桌面 UI，docs-site/ 中的 VuePress 官网。
-  主桌面应用 crate：crates/aktsql_app，Cargo package 和二进制名称为 aktsql。
+  主桌面应用 crate：crates/app，Cargo package 和二进制名称为 aktsql。
+  核心 workspace 边界：crates/engine 放共享模型、消息和导航枚举，crates/sql 放 SQL/DDL 生成，crates/db 放数据库驱动与元数据读取，crates/ui 放 iced 视图、主题和 i18n re-export。
 
   UX 基线：
     - Akt 是高密度专业数据库 GUI，对齐 Navicat 类工作流。
